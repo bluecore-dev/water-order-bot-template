@@ -1,5 +1,7 @@
 # Water Order System
 
+> 🇺🇿 **O‘zbekcha:** [README.uz.md](README.uz.md) — bot nima qiladi, qanday ishlaydi va yangi mijoz uchun qanday o‘rnatiladi.
+
 A Telegram ordering bot for a drinking-water delivery business (e.g. 18.9 L bottled water), with an
 in-bot admin mode and amoCRM integration.
 
