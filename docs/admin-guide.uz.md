@@ -62,6 +62,10 @@ Buyurtmalar bilan asosiy ish (tasdiqlash, kuryer biriktirish) **amoCRM’da** ol
 
 Qiymatni o‘chirish uchun «-» yuboring.
 
+**Bot haqida (About) va Bot tavsifi.** Botning Telegram profilidagi qisqa matn va «Start» oldidan
+chiqadigan matn. Bo‘sh bo‘lsa, kompaniya nomi va aloqa ma’lumotlaridan avtomatik tuziladi. O‘z
+matningizni yozsangiz, o‘sha ishlatiladi.
+
 **🖼 Bot rasmi (avatar).** Sozlamalar ro‘yxatining pastidagi tugma. Logotipni rasm sifatida yuboring,
 u botning profil rasmiga aylanadi (kvadrat rasm yaxshi ko‘rinadi).
 

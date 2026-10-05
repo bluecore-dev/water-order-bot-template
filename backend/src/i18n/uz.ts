@@ -384,6 +384,8 @@ export const uz = {
       damaged_bottle_fine: 'Shikastlangan idish jarimasi',
       reminder_after_hours: 'Eslatma (soatdan keyin)',
       reminder_text: 'Eslatma matni',
+      bot_about: 'Bot haqida (About)',
+      bot_description: 'Bot tavsifi (Start oldidan)',
     } satisfies Record<SettingKey, string>,
     settingHints: {
       company_name: 'Masalan: <i>Toza Suv</i>. Salomlashuv va aloqa bo‘limida ko‘rinadi.',
@@ -400,6 +402,10 @@ export const uz = {
       reminder_after_hours:
         'Botga kirib buyurtma bermagan mijozga necha soatdan keyin bir marta eslatma yuborilsin (masalan: <code>3</code>). Eslatmalar faqat 09:00–21:00 oralig‘ida ketadi. <code>0</code> — o‘chirilgan.',
       reminder_text: 'Eslatmaning o‘z matningiz. Bo‘sh bo‘lsa, standart matn yuboriladi. Ostiga «🛒 Buyurtma berish» tugmasi qo‘shiladi.',
+      bot_about:
+        'Bot profilidagi qisqa matn (120 belgigacha). Bo‘sh bo‘lsa, kompaniya nomidan avtomatik tuziladi.',
+      bot_description:
+        'Botni birinchi ochganda «Start» tugmasidan oldin chiqadigan matn (512 belgigacha, qatorlarga bo‘lish mumkin). Bo‘sh bo‘lsa, sozlamalardan avtomatik tuziladi.',
     } satisfies Record<SettingKey, string>,
     askSetting: (label: string, current: string, hint: string, optional: boolean) =>
       `✏️ <b>${e(label)}</b>\n\nHozirgi qiymat: ${current ? e(current) : '—'}\n${hint}\n\n` +

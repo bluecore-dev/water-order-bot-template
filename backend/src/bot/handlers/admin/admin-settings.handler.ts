@@ -17,7 +17,7 @@ import { isClear } from '../../utils/input';
 import { BotHandler } from '../bot-handler';
 import { adminOnly } from './admin-guard';
 
-const PROFILE_KEYS: SettingKey[] = ['company_name', 'support_phone', 'working_hours', 'payment_note'];
+const PROFILE_KEYS: SettingKey[] = ['company_name', 'support_phone', 'working_hours', 'payment_note', 'bot_about', 'bot_description'];
 
 /** Business settings (company name, contacts, limits) editable without touching code. */
 @Injectable()

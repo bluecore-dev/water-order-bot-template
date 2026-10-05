@@ -16,7 +16,9 @@ export type SettingKey =
   | 'max_empty_bottles'
   | 'damaged_bottle_fine'
   | 'reminder_after_hours'
-  | 'reminder_text';
+  | 'reminder_text'
+  | 'bot_about'
+  | 'bot_description';
 
 export interface SettingDefinition {
   key: SettingKey;
@@ -83,6 +85,10 @@ export const SETTING_DEFINITIONS: Record<SettingKey, SettingDefinition> = {
   reminder_after_hours: { key: 'reminder_after_hours', kind: 'int', defaultValue: '3', optional: false, normalize: int(0, 168) },
   /** Custom reminder text; empty = the default text from the locale. */
   reminder_text: { key: 'reminder_text', kind: 'text', defaultValue: '', optional: true, normalize: text(500) },
+  /** Custom Telegram "About" (short description); empty = generated from the company name. */
+  bot_about: { key: 'bot_about', kind: 'text', defaultValue: '', optional: true, normalize: text(120) },
+  /** Custom "What can this bot do?" text shown before Start; empty = generated from settings. */
+  bot_description: { key: 'bot_description', kind: 'text', defaultValue: '', optional: true, normalize: text(512) },
 };
 
 export const SETTING_KEYS = Object.keys(SETTING_DEFINITIONS) as SettingKey[];

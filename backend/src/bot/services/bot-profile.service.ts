@@ -31,13 +31,14 @@ export class BotProfileService {
     if (!api) return;
     const t = getMessages();
     const s = await this.settings.getAll();
-    const description = t.botProfile
-      .description({ company: s.company_name, phone: formatPhone(s.support_phone), hours: s.working_hours, note: s.payment_note })
-      .slice(0, DESCRIPTION_MAX);
-    const short = (s.company_name ? t.botProfile.shortDescription(s.company_name) : t.botProfile.shortDescriptionGeneric).slice(
-      0,
-      SHORT_DESCRIPTION_MAX,
-    );
+    // Admin-written texts win; otherwise both are generated from the business settings.
+    const description = (
+      s.bot_description ||
+      t.botProfile.description({ company: s.company_name, phone: formatPhone(s.support_phone), hours: s.working_hours, note: s.payment_note })
+    ).slice(0, DESCRIPTION_MAX);
+    const short = (
+      s.bot_about || (s.company_name ? t.botProfile.shortDescription(s.company_name) : t.botProfile.shortDescriptionGeneric)
+    ).slice(0, SHORT_DESCRIPTION_MAX);
 
     try {
       if ((await api.getMyDescription()).description !== description) await api.setMyDescription(description);

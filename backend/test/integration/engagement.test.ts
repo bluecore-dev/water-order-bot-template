@@ -187,6 +187,13 @@ describe('Reminders, announcements and named locations', () => {
       await tg.text(admin, 'Yangi Suv');
       await new Promise((r) => setTimeout(r, 50)); // profile refresh runs in the background
       expect(tg.profile.short_description).toContain('Yangi Suv');
+
+      // Admin-written texts replace the generated ones (multi-line descriptions are kept).
+      await settings.set('bot_about', '💧 Demo — Pure by Nature');
+      await settings.set('bot_description', 'Birinchi qator\n\nIkkinchi qator');
+      await profile.sync();
+      expect(tg.profile.short_description).toBe('💧 Demo — Pure by Nature');
+      expect(tg.profile.description).toBe('Birinchi qator\n\nIkkinchi qator');
     });
 
     it('admins get /admin in their command menu when they open the bot', async () => {
