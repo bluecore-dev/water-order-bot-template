@@ -29,6 +29,7 @@ import { privateChatOnly, rateLimit, timing, userContext } from './middlewares';
 import { PrismaSessionStorage } from './session/prisma-session.storage';
 import { StateRouter } from './state-router';
 import { BotApiHolder } from './services/bot-api.holder';
+import { BotProfileService } from './services/bot-profile.service';
 
 export type BotStatus = 'disabled' | 'starting' | 'running' | 'error' | 'stopped';
 
@@ -54,6 +55,7 @@ export class BotService implements OnApplicationBootstrap, OnModuleDestroy {
     private readonly users: UsersService,
     private readonly admins: AdminsService,
     private readonly holder: BotApiHolder,
+    private readonly botProfile: BotProfileService,
     start: StartHandler,
     admin: AdminHandler,
     product: ProductHandler,
@@ -158,7 +160,7 @@ export class BotService implements OnApplicationBootstrap, OnModuleDestroy {
       return;
     }
     this.logger.log({ msg: 'Bot connected', username: bot.botInfo.username, id: bot.botInfo.id, mode: this.config.bot.mode });
-    await this.setCommands(bot);
+    await this.botProfile.sync();
 
     if (this.config.bot.mode === 'webhook') {
       const url = `${this.config.values.apiUrl}${this.config.bot.webhookPath}`;
@@ -191,20 +193,6 @@ export class BotService implements OnApplicationBootstrap, OnModuleDestroy {
           err: safeErrorMessage(err),
         });
       });
-  }
-
-  private async setCommands(bot: Bot<BotContext>): Promise<void> {
-    const t = getMessages();
-    const base = [
-      { command: 'start', description: t.commands.start },
-      { command: 'cancel', description: t.commands.cancel },
-    ];
-    await bot.api.setMyCommands(base).catch((err) => this.logger.warn({ msg: 'setMyCommands failed', err: safeErrorMessage(err) }));
-    for (const id of await this.admins.notifiableIds()) {
-      await bot.api
-        .setMyCommands([...base, { command: 'admin', description: t.commands.admin }], { scope: { type: 'chat', chat_id: Number(id) } })
-        .catch(() => undefined); // admin has not opened the bot yet
-    }
   }
 
   getWebhookHandler(): RequestHandler | undefined {

@@ -1,6 +1,7 @@
 import { BroadcastStatus } from '@prisma/client';
 import { BotService } from '../../src/bot/bot.service';
 import { BroadcastService } from '../../src/bot/services/broadcast.service';
+import { BotProfileService } from '../../src/bot/services/bot-profile.service';
 import { ReminderService } from '../../src/bot/services/reminder.service';
 import { getMessages } from '../../src/i18n';
 import { GeocodingService } from '../../src/modules/geocoding/geocoding.service';
@@ -153,6 +154,62 @@ describe('Reminders, announcements and named locations', () => {
     it('customers cannot open it', async () => {
       await tg.callback(ali, 'adm:bc:new');
       expect(tg.alerts().at(-1)).toBe(t.admin.notAdmin);
+    });
+  });
+
+  describe('bot profile (description, about, commands, avatar)', () => {
+    const calls = (method: string) => tg.calls.filter((c) => c.method === method);
+
+    it('built from settings, sent only when changed, refreshed after admin edits', async () => {
+      const settings = app.get(SettingsService);
+      await settings.set('support_phone', '90 111 22 33');
+      await settings.set('working_hours', 'Har kuni 08:00–20:00');
+      await settings.set('payment_note', 'Yetkazib berish — bepul.');
+      const profile = app.get(BotProfileService);
+
+      await profile.sync();
+      expect(tg.profile.description).toContain('💧 Demo Suv — toza ichimlik suvini uyingizga yetkazib beramiz.');
+      expect(tg.profile.description).toContain('🚚 Yetkazib berish — bepul.');
+      expect(tg.profile.description).toContain('📞 +998 90 111 22 33 · 🕘 Har kuni 08:00–20:00');
+      expect(tg.profile.description.length).toBeLessThanOrEqual(512);
+      expect(tg.profile.short_description).toBe('💧 Demo Suv — toza ichimlik suvi yetkazib berish. Buyurtma bir necha bosishda!');
+      expect(tg.profile.commands).toEqual([
+        { command: 'start', description: t.commands.start },
+        { command: 'cancel', description: t.commands.cancel },
+      ]);
+
+      tg.clear();
+      await profile.sync(); // nothing changed → nothing re-sent
+      expect(calls('setMyDescription')).toHaveLength(0);
+      expect(calls('setMyShortDescription')).toHaveLength(0);
+
+      await tg.callback(admin, 'adm:set:e:company_name');
+      await tg.text(admin, 'Yangi Suv');
+      await new Promise((r) => setTimeout(r, 50)); // profile refresh runs in the background
+      expect(tg.profile.short_description).toContain('Yangi Suv');
+    });
+
+    it('admins get /admin in their command menu when they open the bot', async () => {
+      await tg.text(admin, '/start');
+      const scoped = calls('setMyCommands').find((c) => c.payload.scope?.chat_id === admin.id);
+      expect(scoped?.payload.commands.map((c: { command: string }) => c.command)).toEqual(['start', 'cancel', 'admin']);
+      tg.clear();
+      await tg.text(ali, '/start');
+      expect(calls('setMyCommands')).toHaveLength(0);
+    });
+
+    it('admin sets the bot avatar from a photo', async () => {
+      const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue(new Response(Buffer.from('jpeg-bytes')));
+      try {
+        await tg.callback(admin, 'adm:set:photo');
+        expect(tg.lastText()).toBe(t.admin.askBotPhoto);
+        await tg.message(admin, { photo: [{ file_id: 'logo', file_unique_id: 'l', width: 640, height: 640, file_size: 2000 }] });
+      } finally {
+        fetchSpy.mockRestore();
+      }
+      const [call] = calls('setMyProfilePhoto');
+      expect(call.payload.photo.type).toBe('static');
+      expect(tg.texts()).toContain(t.admin.botPhotoSaved);
     });
   });
 

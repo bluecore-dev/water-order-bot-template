@@ -51,6 +51,7 @@ export const CB = {
     orderResync: (id: number, page: number) => `adm:ord:rs:${id}:${page}`,
     settings: 'adm:set:list',
     setting: (key: SettingKey) => `adm:set:e:${key}`,
+    botPhoto: 'adm:set:photo',
     amocrm: 'adm:amo',
     amocrmCheck: 'adm:amo:check',
     amocrmRetry: 'adm:amo:retry',

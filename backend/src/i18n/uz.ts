@@ -47,6 +47,25 @@ export const uz = {
     hint: 'Asosiy menyu 👇',
   },
 
+  /** Bot profile texts (Telegram limits: description 512, short description 120 chars). */
+  botProfile: {
+    shortDescription: (company: string) => `💧 ${company} — toza ichimlik suvi yetkazib berish. Buyurtma bir necha bosishda!`,
+    shortDescriptionGeneric: '💧 Toza ichimlik suvi yetkazib berish. Buyurtma bir necha bosishda!',
+    description: (p: { company: string; phone: string; hours: string; note: string }) =>
+      [
+        p.company ? `💧 ${p.company} — toza ichimlik suvini uyingizga yetkazib beramiz.` : '💧 Toza ichimlik suvini uyingizga yetkazib beramiz.',
+        '',
+        '✅ Buyurtma bir necha bosishda',
+        '♻️ Bo‘sh idishlarni kuryer olib ketadi',
+        '📍 Manzil — lokatsiya yoki matn bilan',
+        '📦 Buyurtmalar tarixi va bir bosishda qayta buyurtma',
+        ...(p.note ? [`🚚 ${p.note}`] : []),
+        ...(p.phone || p.hours ? ['', [p.phone && `📞 ${p.phone}`, p.hours && `🕘 ${p.hours}`].filter(Boolean).join(' · ')] : []),
+        '',
+        'Boshlash uchun «Start» tugmasini bosing 👇',
+      ].join('\n'),
+  },
+
   engage: {
     orderButton: '🛒 Buyurtma berish',
     reminder: (company: string) =>
@@ -348,6 +367,10 @@ export const uz = {
     backToOrders: '⬅️ Buyurtmalar',
 
     settingsTitle: '⚙️ <b>Sozlamalar</b>\n\nO‘zgartirish uchun sozlamani tanlang:',
+    botPhoto: '🖼 Bot rasmi (avatar)',
+    askBotPhoto: '🖼 Botning yangi rasmini (avatarini) yuboring. Kvadrat rasm yaxshi ko‘rinadi, masalan logotip.',
+    botPhotoSaved: '✅ Bot rasmi yangilandi. Telegram’da bir necha daqiqada ko‘rinadi.',
+    botPhotoFailed: (error: string) => `❌ Telegram rasmni qabul qilmadi: <code>${e(error)}</code>`,
     settingButton: (label: string, value: string) => `${label}: ${value || '—'}`,
     settingLabels: {
       company_name: 'Kompaniya nomi',

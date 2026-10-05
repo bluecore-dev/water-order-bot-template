@@ -13,6 +13,7 @@ import { AdminBroadcastHandler } from './handlers/admin/admin-broadcast.handler'
 import { BroadcastService } from './services/broadcast.service';
 import { ReminderService } from './services/reminder.service';
 import { BotApiHolder } from './services/bot-api.holder';
+import { BotProfileService } from './services/bot-profile.service';
 import { BotService } from './bot.service';
 import { CatalogFlow } from './conversations/catalog.flow';
 import { CheckoutFlow } from './conversations/checkout.flow';
@@ -52,6 +53,7 @@ import { TelegramWebhookController } from './telegram-webhook.controller';
   providers: [
     BotService,
     BotApiHolder,
+    BotProfileService,
     BotUi,
     ProductMediaService,
     TelegramFilesService,

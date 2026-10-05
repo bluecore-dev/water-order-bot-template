@@ -5,6 +5,7 @@ import { SettingsService } from '../../modules/settings/settings.service';
 import { BotContext } from '../context';
 import { labelsFor } from '../keyboards';
 import { BotUi } from '../services/bot-ui.service';
+import { BotProfileService } from '../services/bot-profile.service';
 import { StateRouter } from '../state-router';
 import { BotHandler } from './bot-handler';
 
@@ -14,11 +15,13 @@ export class StartHandler implements BotHandler {
   constructor(
     private readonly ui: BotUi,
     private readonly settings: SettingsService,
+    private readonly profile: BotProfileService,
   ) {}
 
   register(bot: Composer<BotContext>, _router: StateRouter): void {
     bot.command('start', async (ctx) => {
       this.ui.resetFlow(ctx);
+      if (this.ui.isAdmin(ctx)) await this.profile.ensureAdminCommands(ctx.from!.id);
       await this.ui.showMainMenu(ctx, ctx.t.menu.welcome(await this.ui.companyName(ctx)));
     });
 

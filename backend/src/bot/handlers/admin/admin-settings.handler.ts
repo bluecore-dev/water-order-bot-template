@@ -9,16 +9,23 @@ import { CB } from '../../callbacks';
 import { BotContext } from '../../context';
 import { cancelKeyboard } from '../../keyboards';
 import { BotUi } from '../../services/bot-ui.service';
+import { BotProfileService } from '../../services/bot-profile.service';
+import { TelegramFilesService } from '../../services/telegram-files.service';
+import { safeErrorMessage } from '../../../common/utils/redact';
 import { StateRouter } from '../../state-router';
 import { isClear } from '../../utils/input';
 import { BotHandler } from '../bot-handler';
 import { adminOnly } from './admin-guard';
+
+const PROFILE_KEYS: SettingKey[] = ['company_name', 'support_phone', 'working_hours', 'payment_note'];
 
 /** Business settings (company name, contacts, limits) editable without touching code. */
 @Injectable()
 export class AdminSettingsHandler implements BotHandler {
   constructor(
     private readonly settings: SettingsService,
+    private readonly profile: BotProfileService,
+    private readonly files: TelegramFilesService,
     private readonly ui: BotUi,
   ) {}
 
@@ -35,6 +42,27 @@ export class AdminSettingsHandler implements BotHandler {
       await this.ui.answer(ctx);
       await this.askValue(ctx, key);
     });
+
+    bot.callbackQuery(CB.admin.botPhoto, async (ctx) => {
+      await this.ui.answer(ctx);
+      ctx.session.state = 'admin:bot:photo';
+      await this.ui.reply(ctx, ctx.t.admin.askBotPhoto, cancelKeyboard(ctx.t));
+    });
+
+    router.on(
+      'admin:bot:photo',
+      adminOnly(async (ctx) => {
+        const image = await this.files.downloadImage(ctx);
+        if (!image) return this.ui.reply(ctx, ctx.t.admin.invalidPhoto);
+        try {
+          await this.profile.setPhoto(image.data);
+        } catch (err) {
+          return this.ui.reply(ctx, ctx.t.admin.botPhotoFailed(safeErrorMessage(err, 200)));
+        }
+        this.ui.resetFlow(ctx);
+        await this.ui.showMainMenu(ctx, ctx.t.admin.botPhotoSaved);
+      }),
+    );
 
     router.on(
       'admin:setting:edit',
@@ -55,6 +83,8 @@ export class AdminSettingsHandler implements BotHandler {
         this.ui.resetFlow(ctx);
         await this.ui.showMainMenu(ctx, ctx.t.admin.saved);
         await this.showList(ctx);
+        // Company name, contacts and payment note also appear in the bot's Telegram profile.
+        if (PROFILE_KEYS.includes(key)) void this.profile.sync();
       }),
     );
   }
@@ -72,6 +102,7 @@ export class AdminSettingsHandler implements BotHandler {
       const label = ctx.t.admin.settingLabels[key];
       kb.text(ctx.t.admin.settingButton(label, truncate(this.display(key, values[key]), 28)), CB.admin.setting(key)).row();
     }
+    kb.text(ctx.t.admin.botPhoto, CB.admin.botPhoto).row();
     kb.text(ctx.t.admin.backToMenu, CB.admin.menu);
     await this.ui.editOrReply(ctx, ctx.t.admin.settingsTitle, kb);
   }

@@ -21,6 +21,7 @@ export const BOT_STATES = [
   'admin:setting:edit',
   'admin:admins:add',
   'admin:broadcast:compose',
+  'admin:bot:photo',
 ] as const;
 
 export type BotState = (typeof BOT_STATES)[number];

@@ -58,6 +58,8 @@ export class FakeTelegram {
   readonly bot: Bot<BotContext>;
   /** chat ids for which Telegram answers with an error (e.g. 403 "bot was blocked"). */
   readonly failFor = new Map<number, { error_code: number; description: string }>();
+  /** Bot profile as Telegram would store it (set/get round-trip). */
+  readonly profile = { description: '', short_description: '', commands: [] as unknown[] };
   private messageId = 1000;
   private updateId = 1;
 
@@ -89,6 +91,21 @@ export class FakeTelegram {
         return { ...base, text: payload.text };
       case 'sendPhoto':
         return { ...base, caption: payload.caption, photo: [{ file_id: 'sent-photo-file-id', file_unique_id: 'u1', width: 800, height: 800 }] };
+      case 'getMyDescription':
+        return { description: this.profile.description };
+      case 'getMyShortDescription':
+        return { short_description: this.profile.short_description };
+      case 'getMyCommands':
+        return payload.scope ? [] : this.profile.commands;
+      case 'setMyDescription':
+        this.profile.description = payload.description;
+        return true;
+      case 'setMyShortDescription':
+        this.profile.short_description = payload.short_description;
+        return true;
+      case 'setMyCommands':
+        if (!payload.scope) this.profile.commands = payload.commands;
+        return true;
       case 'copyMessage':
         return { message_id: ++this.messageId };
       case 'getFile':

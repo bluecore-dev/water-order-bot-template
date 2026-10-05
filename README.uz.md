@@ -42,9 +42,13 @@ Qulayliklar:
 | 📊 **Statistika** | Bugun, 7 kun va 30 kundagi buyurtmalar soni va summasi, yangi buyurtmalar, mijozlar soni, amoCRM navbati. |
 | 📣 **Xabar yuborish** | Barcha mijozlarga yangilik, chegirma yoki reklama yuborish: matn, rasm yoki video. Avval namuna ko‘rsatiladi, tasdiqlangach xabar fonda tarqatiladi va ostiga «🛒 Buyurtma berish» tugmasi qo‘shiladi. Oxirida nechtasiga yetkazilgani va nechtasi botni bloklagani haqida hisobot keladi. |
 | 📋 **Buyurtmalar** | So‘nggi buyurtmalar: mijoz, telefon, manzil (xaritada ochish havolasi bilan), mahsulotlar. Har birining amoCRM’ga yuborilgan-yuborilmagani ko‘rinadi, kerak bo‘lsa qayta yuboriladi. |
-| ⚙️ **Sozlamalar** | Kompaniya nomi, aloqa telefoni va Telegrami, ish vaqti, to‘lov izohi, **minimal buyurtma**, **shikastlangan idish jarimasi**, **eslatma vaqti va matni**, cheklovlar. |
+| ⚙️ **Sozlamalar** | Kompaniya nomi, aloqa telefoni va Telegrami, ish vaqti, to‘lov izohi, **minimal buyurtma**, **shikastlangan idish jarimasi**, **eslatma vaqti va matni**, cheklovlar, **🖼 bot rasmi (avatar)**. |
 | 🔗 **amoCRM** | Ulanish holati, «🔍 Tekshirish», xato bilan qolgan buyurtmalarni qayta yuborish. |
 | 👥 **Adminlar** | Bosh admin yangi admin qo‘sha va o‘chira oladi. Yangi adminni Telegram kontaktlaridan tanlash kifoya. |
+
+Botning Telegram profili (bo‘sh chatda chiqadigan «Bu bot nima qila oladi?» matni, qisqa «About» va
+buyruqlar menyusi) sozlamalardan **avtomatik** tuziladi va kompaniya nomi yoki aloqa ma’lumotlari
+o‘zgarganda o‘zi yangilanadi. BotFather’da hech narsa yozish shart emas.
 
 Mijozlar «⚙️ Boshqaruv» tugmasini ko‘rmaydi. Admin huquqi har bir xabarda qayta tekshiriladi.
 
@@ -69,7 +73,7 @@ kutib o‘tirmaydi.
 - «Tasdiqlash» tugmasi ikki marta bosilsa ham **bitta buyurtma** yaratiladi. Eski tugmalar 12 soatdan keyin ishlamaydi.
 - Minimal buyurtma (masalan, 2 ta) server tomonida majburiy tekshiriladi.
 - Shikastlangan idish jarimasi mijozga oldindan ko‘rsatiladi, lekin summaga qo‘shilmaydi, chunki uni kuryer joyida oladi.
-- **104 ta avtomatik test.** Ular to‘liq bot suhbatlari, buyurtma yaratish va amoCRM’dagi xato va qayta urinish holatlarini tekshiradi.
+- **107 ta avtomatik test.** Ular to‘liq bot suhbatlari, buyurtma yaratish va amoCRM’dagi xato va qayta urinish holatlarini tekshiradi.
 
 ---
 

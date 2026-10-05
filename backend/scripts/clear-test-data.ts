@@ -1,6 +1,6 @@
 /**
  * Cut-over helper: removes everything customers produced while testing (orders, users,
- * addresses, sessions, amoCRM queue) and restarts order numbers at #1001.
+ * addresses, sessions, amoCRM queue, test announcements) and restarts order numbers at #1001.
  * Keeps products, settings, admins and amoCRM credentials.
  *
  * Run BEFORE connecting amoCRM / switching to the client's bot token, otherwise test orders
@@ -20,6 +20,7 @@ async function main() {
       addresses: await prisma.address.count(),
       sessions: await prisma.botSession.count(),
       amocrmQueue: await prisma.amocrmSync.count(),
+      broadcasts: await prisma.broadcast.count(),
     };
     const db = new URL(process.env.DATABASE_URL ?? 'postgresql://unknown/unknown').pathname.slice(1);
     console.log(`Database "${db}":`, counts);
@@ -31,6 +32,7 @@ async function main() {
 
     await prisma.$transaction([
       prisma.amocrmSync.deleteMany(),
+      prisma.broadcast.deleteMany(),
       prisma.orderItem.deleteMany(),
       prisma.order.deleteMany(),
       prisma.address.deleteMany(),

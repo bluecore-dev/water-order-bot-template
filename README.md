@@ -12,6 +12,8 @@ in-bot admin mode and amoCRM integration.
   web panel. See [docs/architecture.md](docs/architecture.md#decisions).
 - People who open the bot but don't order get **one daytime reminder** with an order button.
 - A shared **location is turned into a street/district name** (OpenStreetMap, or Yandex with a key).
+- The bot's **Telegram profile** (description, about text, command menu) is generated from the
+  settings and kept in sync. Admins can change the bot **avatar** from the bot.
 - **amoCRM** gets every order (contact found or created by phone, lead with the order, full note).
   If amoCRM is down, orders are kept locally and retried. Nothing is lost.
 
@@ -90,7 +92,7 @@ Open the bot in Telegram and send `/start`. If your Telegram id is in `ADMIN_TEL
 
 ## Tests
 
-`npm test` runs 104 tests: unit tests (pricing, phone, crypto, payloads, env) and integration
+`npm test` runs 107 tests: unit tests (pricing, phone, crypto, payloads, env) and integration
 tests against a real PostgreSQL test database. Those cover order creation and price snapshots,
 idempotency, the amoCRM worker against a fake amoCRM (success, failure, retry, no duplicates,
 token refresh), and **complete bot conversations** driven through grammY with a fake Telegram API.

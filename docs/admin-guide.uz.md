@@ -62,6 +62,12 @@ Buyurtmalar bilan asosiy ish (tasdiqlash, kuryer biriktirish) **amoCRM’da** ol
 
 Qiymatni o‘chirish uchun «-» yuboring.
 
+**🖼 Bot rasmi (avatar).** Sozlamalar ro‘yxatining pastidagi tugma. Logotipni rasm sifatida yuboring,
+u botning profil rasmiga aylanadi (kvadrat rasm yaxshi ko‘rinadi).
+
+Kompaniya nomi, telefon, ish vaqti yoki to‘lov izohi o‘zgarsa, botning Telegram profilidagi tavsif
+(bo‘sh chatda chiqadigan «Bu bot nima qila oladi?» matni) ham avtomatik yangilanadi.
+
 ## 🔗 amoCRM
 
 Ulanish holati va navbat ko‘rsatiladi. «🔍 Ulanishni tekshirish» amoCRM bilan aloqa bor-yo‘qligini
