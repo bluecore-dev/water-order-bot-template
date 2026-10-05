@@ -8,6 +8,8 @@ import { AdminProductField } from './context';
 export const CB = {
   noop: 'noop',
   catalog: 'cat',
+  /** "Order" button under reminders/broadcasts: always opens the catalog in a NEW message. */
+  startOrder: 'go',
   product: (id: number) => `prd:${id}`,
   qty: (id: number, qty: number) => `qty:${id}:${qty}`,
   add: (id: number, qty: number) => `add:${id}:${qty}`,
@@ -55,6 +57,9 @@ export const CB = {
     admins: 'adm:adm:list',
     adminAdd: 'adm:adm:add',
     adminRemove: (telegramId: string) => `adm:adm:del:${telegramId}`,
+    broadcast: 'adm:bc:new',
+    broadcastSend: 'adm:bc:send',
+    broadcastCancel: 'adm:bc:cancel',
   },
 } as const;
 

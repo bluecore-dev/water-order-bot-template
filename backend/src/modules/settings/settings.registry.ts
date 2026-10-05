@@ -14,7 +14,9 @@ export type SettingKey =
   | 'max_item_quantity'
   | 'min_order_quantity'
   | 'max_empty_bottles'
-  | 'damaged_bottle_fine';
+  | 'damaged_bottle_fine'
+  | 'reminder_after_hours'
+  | 'reminder_text';
 
 export interface SettingDefinition {
   key: SettingKey;
@@ -77,6 +79,10 @@ export const SETTING_DEFINITIONS: Record<SettingKey, SettingDefinition> = {
       return v !== null && v <= 100_000_000 ? String(v) : null;
     },
   },
+  /** Hours of inactivity after which a user without orders gets one reminder; 0 = off. */
+  reminder_after_hours: { key: 'reminder_after_hours', kind: 'int', defaultValue: '3', optional: false, normalize: int(0, 168) },
+  /** Custom reminder text; empty = the default text from the locale. */
+  reminder_text: { key: 'reminder_text', kind: 'text', defaultValue: '', optional: true, normalize: text(500) },
 };
 
 export const SETTING_KEYS = Object.keys(SETTING_DEFINITIONS) as SettingKey[];

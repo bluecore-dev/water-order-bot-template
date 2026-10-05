@@ -15,7 +15,7 @@ import { getMessages } from '../../i18n';
 import { AdminsService } from '../../modules/admins/admins.service';
 import { OrdersService } from '../../modules/orders/orders.service';
 import { UsersService } from '../../modules/users/users.service';
-import { BotService } from '../bot.service';
+import { BotApiHolder } from './bot-api.holder';
 
 /** Outbound operational messages: admin alerts and the optional order-copy group. */
 @Injectable()
@@ -23,7 +23,7 @@ export class NotifierService {
   private readonly logger = new Logger(NotifierService.name);
 
   constructor(
-    private readonly bot: BotService,
+    private readonly bot: BotApiHolder,
     private readonly admins: AdminsService,
     private readonly orders: OrdersService,
     private readonly config: AppConfigService,

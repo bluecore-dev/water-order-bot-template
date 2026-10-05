@@ -43,3 +43,8 @@ export function formatDateTime(date: Date, timeZone: string): string {
 export function formatDate(date: Date, timeZone: string): string {
   return formatDateTime(date, timeZone).slice(0, 10);
 }
+
+/** Hour of day (0-23) in the business timezone. */
+export function hourInTz(date: Date, timeZone: string): number {
+  return zonedParts(date, timeZone).hour;
+}

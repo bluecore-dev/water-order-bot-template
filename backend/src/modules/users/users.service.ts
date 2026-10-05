@@ -4,6 +4,9 @@ import { PrismaService } from '../../database/prisma.service';
 import { DomainError } from '../../common/errors';
 import { normalizePhone } from '../../common/utils/phone';
 
+/** lastActivityAt is refreshed at most this often, so ordinary messages don't each cause a write. */
+const ACTIVITY_WRITE_INTERVAL_MS = 5 * 60 * 1000;
+
 export interface TelegramProfile {
   id: number;
   username?: string;
@@ -48,6 +51,18 @@ export class UsersService {
       existing.firstName !== data.firstName ||
       existing.lastName !== data.lastName;
     return changed ? this.prisma.user.update({ where: { id: existing.id }, data }) : existing;
+  }
+
+  /** Records that the user is active (and therefore not blocking the bot any more). */
+  async touchActivity(user: User, now = new Date()): Promise<User> {
+    const stale = now.getTime() - user.lastActivityAt.getTime() > ACTIVITY_WRITE_INTERVAL_MS;
+    if (!stale && !user.botBlockedAt) return user;
+    return this.prisma.user.update({ where: { id: user.id }, data: { lastActivityAt: now, botBlockedAt: null } });
+  }
+
+  /** Telegram answered 403: the user blocked the bot or deleted the account. */
+  async markBlocked(telegramId: number | bigint | string): Promise<void> {
+    await this.prisma.user.updateMany({ where: { telegramId: BigInt(telegramId), botBlockedAt: null }, data: { botBlockedAt: new Date() } });
   }
 
   findById(id: number): Promise<User | null> {

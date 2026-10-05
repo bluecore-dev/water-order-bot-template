@@ -3,6 +3,7 @@ import { Composer, InlineKeyboard } from 'grammy';
 import { isDomainError } from '../../common/errors';
 import { AddressesService } from '../../modules/addresses/addresses.service';
 import { CB } from '../callbacks';
+import { CheckoutFlow } from '../conversations/checkout.flow';
 import { BotContext } from '../context';
 import { labelsFor, locationKeyboard, skipKeyboard } from '../keyboards';
 import { BotUi } from '../services/bot-ui.service';
@@ -15,6 +16,7 @@ import { BotHandler, intParam } from './bot-handler';
 export class AddressesHandler implements BotHandler {
   constructor(
     private readonly addresses: AddressesService,
+    private readonly checkout: CheckoutFlow,
     private readonly ui: BotUi,
   ) {}
 
@@ -46,9 +48,8 @@ export class AddressesHandler implements BotHandler {
     router.on('addresses:new', async (ctx) => {
       const location = ctx.message?.location;
       if (location) {
-        ctx.session.pendingLocation = { latitude: location.latitude, longitude: location.longitude };
         ctx.session.state = 'addresses:new_details';
-        await this.ui.reply(ctx, ctx.t.checkout.askAddressDetails, skipKeyboard(ctx.t));
+        await this.checkout.receiveLocation(ctx, location.latitude, location.longitude);
         return;
       }
       const text = ctx.message?.text;
@@ -63,9 +64,12 @@ export class AddressesHandler implements BotHandler {
         ctx.session.state = 'addresses:new';
         return this.ui.reply(ctx, ctx.t.checkout.askAddress, locationKeyboard(ctx.t));
       }
+      if (ctx.message?.location) {
+        return this.checkout.receiveLocation(ctx, ctx.message.location.latitude, ctx.message.location.longitude);
+      }
       if (!text) return this.ui.reply(ctx, ctx.t.checkout.askAddressDetails, skipKeyboard(ctx.t));
-      const address = isSkip(text) ? ctx.t.checkout.locationOnly(pending.latitude, pending.longitude) : text;
-      await this.save(ctx, { address, ...pending });
+      const address = CheckoutFlow.locationAddress(ctx.t, pending, isSkip(text) ? null : text.trim());
+      await this.save(ctx, { address, latitude: pending.latitude, longitude: pending.longitude });
     });
   }
 

@@ -8,6 +8,11 @@ import { SettingsModule } from '../modules/settings/settings.module';
 import { StatsModule } from '../modules/stats/stats.module';
 import { StorageModule } from '../modules/storage/storage.module';
 import { UsersModule } from '../modules/users/users.module';
+import { GeocodingModule } from '../modules/geocoding/geocoding.module';
+import { AdminBroadcastHandler } from './handlers/admin/admin-broadcast.handler';
+import { BroadcastService } from './services/broadcast.service';
+import { ReminderService } from './services/reminder.service';
+import { BotApiHolder } from './services/bot-api.holder';
 import { BotService } from './bot.service';
 import { CatalogFlow } from './conversations/catalog.flow';
 import { CheckoutFlow } from './conversations/checkout.flow';
@@ -40,15 +45,20 @@ import { TelegramWebhookController } from './telegram-webhook.controller';
     AdminsModule,
     StatsModule,
     StorageModule,
+    GeocodingModule,
     AmocrmModule,
   ],
   controllers: [TelegramWebhookController],
   providers: [
     BotService,
+    BotApiHolder,
     BotUi,
     ProductMediaService,
     TelegramFilesService,
     NotifierService,
+    ReminderService,
+    BroadcastService,
+    AdminBroadcastHandler,
     CatalogFlow,
     CheckoutFlow,
     StartHandler,

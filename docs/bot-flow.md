@@ -32,8 +32,9 @@ Checkout (advance() always jumps to the first missing piece):
                       shows the damaged-bottle fine notice when it is set
    📞 phone           skipped if saved; contact button or typed number;
                       someone else's contact card is rejected
-   📍 address         location button → optional "house/apartment" note, or typed text,
-                      or one tap on a saved address
+   📍 address         location button → reverse-geocoded to "street, district, city"
+                      → optional "house/apartment" note; or typed text; or one tap on a
+                      saved address. Unknown place → coordinates are kept as text.
    🧾 summary         items, bottles, phone, address, TOTAL, payment note
                       [✅ Tasdiqlash] [✏️ O‘zgartirish] [❌ Bekor qilish]
 ✅ → order saved → "✅ Buyurtmangiz qabul qilindi! Buyurtma: #1042 …"
@@ -78,11 +79,23 @@ Guarantees:
 
 Price changes apply to the very next customer message. Past orders keep their prices.
 
+## Reminder and announcements
+
+- **Reminder.** A user with no orders who has been inactive for `reminder_after_hours`
+  (default 3, 0 = off) gets one message: the default text or `reminder_text`, plus a
+  `🛒 Buyurtma berish` button. It is sent only between 09:00 and 21:00 (business timezone),
+  never to admins, never twice, and not to people inactive for more than 7 days.
+- **Announcement (`📣 Xabar yuborish`).** The admin's message is copied to every user who hasn't
+  blocked the bot (~25 per second, in the background, resumable after a restart), with the same
+  order button. The author receives a report: delivered / blocked / failed. A 403 from Telegram
+  marks the user as blocked until they write to the bot again.
+- The order button always opens the catalog in a **new** message, so the announcement stays.
+
 ## Conversation states
 
 `BotSession.value.state`: `idle`, `checkout:bottles_custom`, `checkout:phone`,
 `checkout:address`, `checkout:address_details`, `profile:phone`, `addresses:new`,
 `addresses:new_details`, `admin:product:create:{name,price,description,photo}`,
-`admin:product:edit`, `admin:setting:edit`, `admin:admins:add`.
+`admin:product:edit`, `admin:setting:edit`, `admin:admins:add`, `admin:broadcast:compose`.
 Free input (text, contact, location, photo, shared user) is routed by `StateRouter` to the
 handler of the current state. Buttons are handled independently of state.

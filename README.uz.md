@@ -21,7 +21,7 @@ suv kompaniyasi uchun bot** qilsa bo‘ladi va kodni o‘zgartirish kerak bo‘l
 
 | Bo‘lim | Imkoniyatlar |
 |---|---|
-| 🛒 **Suv buyurtma qilish** | Mahsulotni tanlash va miqdorni ➖ / ➕ bilan belgilash. Nechta bo‘sh idish qaytarishini tanlash (0–4 tugma yoki «5+» deb son yozish). Telefonni bitta tugma bilan yuborish. Manzilni lokatsiya yoki matn sifatida yuborish (lokatsiyadan keyin uy, qavat va xonadonni qo‘shish mumkin). Xulosani ko‘rib ✅ tasdiqlash yoki ✏️ o‘zgartirish. |
+| 🛒 **Suv buyurtma qilish** | Mahsulotni tanlash va miqdorni ➖ / ➕ bilan belgilash. Nechta bo‘sh idish qaytarishini tanlash (0–4 tugma yoki «5+» deb son yozish). Telefonni bitta tugma bilan yuborish. Manzilni lokatsiya yoki matn sifatida yuborish. **Lokatsiya ko‘cha va tuman nomiga aylantiriladi**, keyin uy, qavat va xonadonni qo‘shish mumkin. Xulosani ko‘rib ✅ tasdiqlash yoki ✏️ o‘zgartirish. |
 | 📦 **Buyurtmalarim** | Barcha buyurtmalar va ularning holati. Ichiga kirib batafsil ko‘rish. «🔁 Qayta buyurtma qilish» bitta tugma bilan. |
 | 👤 **Profilim** | Ism, telefon, buyurtmalar soni, telefonni o‘zgartirish. |
 | 📍 **Manzillarim** | Saqlangan manzillar (10 tagacha): asosiy qilish, o‘chirish, yangisini qo‘shish. |
@@ -31,6 +31,8 @@ Qulayliklar:
 - **Qaytgan mijozdan telefon qayta so‘ralmaydi.** Saqlangan manzil bitta bosishda tanlanadi.
 - Har qadamda «❌ Bekor qilish» bor. Tushunarsiz xabarga bot muloyim yo‘l-yo‘riq beradi.
 - Bitta mahsulot bo‘lsa, ro‘yxat ko‘rsatilmaydi va mijoz to‘g‘ridan-to‘g‘ri mahsulot kartasiga o‘tadi.
+- **Eslatma.** Botga kirib, buyurtma bermay ketgan mijozga belgilangan vaqtdan keyin (standart 3 soat)
+  bir marta «🛒 Buyurtma berish» tugmasi bilan eslatma boradi. Eslatmalar faqat kunduzi (09:00–21:00) yuboriladi.
 
 ### ⚙️ Admin uchun («⚙️ Boshqaruv» tugmasi yoki `/admin`)
 
@@ -38,8 +40,9 @@ Qulayliklar:
 |---|---|
 | 📦 **Mahsulotlar** | Yangi mahsulot qo‘shish, nom, narx, tavsif va rasmni o‘zgartirish, sotuvdan olish yoki qaytarish. Mahsulot hech qachon buyurtma qilinmagan bo‘lsa, o‘chirish ham mumkin. **Yangi narx darhol ko‘rinadi.** |
 | 📊 **Statistika** | Bugun, 7 kun va 30 kundagi buyurtmalar soni va summasi, yangi buyurtmalar, mijozlar soni, amoCRM navbati. |
+| 📣 **Xabar yuborish** | Barcha mijozlarga yangilik, chegirma yoki reklama yuborish: matn, rasm yoki video. Avval namuna ko‘rsatiladi, tasdiqlangach xabar fonda tarqatiladi va ostiga «🛒 Buyurtma berish» tugmasi qo‘shiladi. Oxirida nechtasiga yetkazilgani va nechtasi botni bloklagani haqida hisobot keladi. |
 | 📋 **Buyurtmalar** | So‘nggi buyurtmalar: mijoz, telefon, manzil (xaritada ochish havolasi bilan), mahsulotlar. Har birining amoCRM’ga yuborilgan-yuborilmagani ko‘rinadi, kerak bo‘lsa qayta yuboriladi. |
-| ⚙️ **Sozlamalar** | Kompaniya nomi, aloqa telefoni va Telegrami, ish vaqti, to‘lov izohi, **minimal buyurtma**, **shikastlangan idish jarimasi**, cheklovlar. |
+| ⚙️ **Sozlamalar** | Kompaniya nomi, aloqa telefoni va Telegrami, ish vaqti, to‘lov izohi, **minimal buyurtma**, **shikastlangan idish jarimasi**, **eslatma vaqti va matni**, cheklovlar. |
 | 🔗 **amoCRM** | Ulanish holati, «🔍 Tekshirish», xato bilan qolgan buyurtmalarni qayta yuborish. |
 | 👥 **Adminlar** | Bosh admin yangi admin qo‘sha va o‘chira oladi. Yangi adminni Telegram kontaktlaridan tanlash kifoya. |
 
@@ -50,7 +53,8 @@ Mijozlar «⚙️ Boshqaruv» tugmasini ko‘rmaydi. Admin huquqi har bir xabard
 Har bir buyurtma uchun:
 1. **Kontakt.** Telefon raqami bo‘yicha qidiriladi, topilmasa yaratiladi. Qaytgan mijoz uchun dublikat ochilmaydi.
 2. **Lid.** «Buyurtma #1042», summa bilan, kerakli voronka va bosqichga tushadi.
-3. **Izoh.** Buyurtmaning to‘liq tarkibi: mahsulotlar, bo‘sh idishlar, manzil, xarita havolasi, Telegram.
+3. **Izoh.** Buyurtmaning to‘liq tarkibi: mahsulotlar, bo‘sh idishlar, manzil (joy nomi bilan), **Yandex xarita
+   havolasi va aniq koordinatalar**, Telegram. amoCRM’da «Xarita» maydoni sozlansa, havola lidning o‘ziga ham yoziladi.
 
 **amoCRM ishlamay qolsa ham buyurtma yo‘qolmaydi.** U bazada saqlanadi va bot avtomatik qayta
 yuboradi. Muammo uzoq davom etsa, adminlarga Telegram orqali xabar keladi. Mijoz esa amoCRM’ni
@@ -65,7 +69,7 @@ kutib o‘tirmaydi.
 - «Tasdiqlash» tugmasi ikki marta bosilsa ham **bitta buyurtma** yaratiladi. Eski tugmalar 12 soatdan keyin ishlamaydi.
 - Minimal buyurtma (masalan, 2 ta) server tomonida majburiy tekshiriladi.
 - Shikastlangan idish jarimasi mijozga oldindan ko‘rsatiladi, lekin summaga qo‘shilmaydi, chunki uni kuryer joyida oladi.
-- **90 ta avtomatik test.** Ular to‘liq bot suhbatlari, buyurtma yaratish va amoCRM’dagi xato va qayta urinish holatlarini tekshiradi.
+- **104 ta avtomatik test.** Ular to‘liq bot suhbatlari, buyurtma yaratish va amoCRM’dagi xato va qayta urinish holatlarini tekshiradi.
 
 ---
 
@@ -90,6 +94,8 @@ avval bazaga yoziladi, keyin alohida qism uni amoCRM’ga yetkazadi.
 - **Telegram bot tokeni**: [@BotFather](https://t.me/BotFather) da `/newbot` orqali olinadi
 - **Server (VPS)**, masalan Ubuntu. **Domen shart emas**, chunki bot domensiz ham ishlaydi (polling rejimi).
 - **amoCRM** ixtiyoriy. Ulanmagan bo‘lsa, buyurtmalar navbatda kutib turadi.
+- Lokatsiya nomlari uchun kalit kerak emas: standart bo‘yicha bepul OpenStreetMap ishlatiladi. Yandex kaliti
+  bo‘lsa (`GEOCODER_PROVIDER=yandex`, `YANDEX_GEOCODER_API_KEY`), toza o‘zbekcha nomlar chiqadi.
 
 ---
 

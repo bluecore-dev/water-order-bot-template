@@ -106,6 +106,7 @@ describe('amoCRM payloads', () => {
     expect(note).toContain('Bo‘sh idishlar: 2 ta');
     expect(note).toContain('Chilonzor 9-kvartal, 12-uy');
     expect(note).toContain('yandex.uz/maps/?pt=69.2034,41.2856');
+    expect(note).toContain('Koordinatalar: 41.285600, 69.203400');
     expect(note).toContain('05.10.2026 14:30');
   });
 });

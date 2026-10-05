@@ -12,6 +12,8 @@ export interface StatsSummary {
   newOrders: number;
   activeProducts: number;
   customers: number;
+  botUsers: number;
+  blockedUsers: number;
   amocrm: { pendingOrders: number; failedOrders: number };
 }
 
@@ -32,7 +34,7 @@ export class StatsService {
     const window = (from: Date) =>
       this.prisma.order.aggregate({ where: { createdAt: { gte: from }, ...notCancelled }, _count: true, _sum: { totalAmount: true } });
 
-    const [today, week, month, totalOrders, newOrders, activeProducts, customers, pending, failed] = await Promise.all([
+    const [today, week, month, totalOrders, newOrders, activeProducts, customers, botUsers, blockedUsers, pending, failed] = await Promise.all([
       window(todayStart),
       window(weekStart),
       window(monthStart),
@@ -40,6 +42,8 @@ export class StatsService {
       this.prisma.order.count({ where: { status: OrderStatus.NEW } }),
       this.prisma.product.count({ where: { isActive: true } }),
       this.prisma.user.count({ where: { orders: { some: {} } } }),
+      this.prisma.user.count(),
+      this.prisma.user.count({ where: { botBlockedAt: { not: null } } }),
       this.countOrdersWithSync([SyncStatus.PENDING, SyncStatus.PROCESSING]),
       this.countOrdersWithSync([SyncStatus.FAILED]),
     ]);
@@ -57,6 +61,8 @@ export class StatsService {
       newOrders,
       activeProducts,
       customers,
+      botUsers,
+      blockedUsers,
       amocrm: { pendingOrders: pending, failedOrders: failed },
     };
   }

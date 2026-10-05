@@ -27,6 +27,18 @@ paydo bo‘ladi (yoki `/admin` buyrug‘ini yuboring). Mijozlar bu tugmani ko‘
 Bugungi, so‘nggi 7 va 30 kunlik buyurtmalar soni va summasi, yangi buyurtmalar, mijozlar soni,
 amoCRM navbati.
 
+## 📣 Xabar yuborish (yangilik, chegirma, reklama)
+
+1. «📣 Xabar yuborish» tugmasini bosing.
+2. Xabarni oddiy yozganday jo‘nating: matn, rasm (izoh bilan), video yoki fayl. Telegram
+   formatlari (qalin, havola va boshqalar) saqlanadi.
+3. Bot xabarni sizga mijozlar ko‘radigan ko‘rinishda qaytaradi. Ostida «🛒 Buyurtma berish» tugmasi bo‘ladi.
+4. «✅ Yuborish» ni bosing. Xabar barcha mijozlarga fonda tarqatiladi, bot esa ishlashda davom etadi.
+5. Tugagach hisobot keladi: nechtasiga yetkazildi va nechtasi botni bloklagan. Botni bloklaganlar
+   keyingi safar hisobga olinmaydi.
+
+Bir vaqtda faqat bitta xabar yuboriladi. Server qayta ishga tushsa, yuborish to‘xtagan joyidan davom etadi.
+
 ## 📋 Buyurtmalar
 
 So‘nggi buyurtmalar ro‘yxati. Belgilarning ma’nosi: ✅ amoCRM’ga yuborilgan, ⏳ navbatda,
@@ -44,6 +56,8 @@ Buyurtmalar bilan asosiy ish (tasdiqlash, kuryer biriktirish) **amoCRM’da** ol
 | To‘lov izohi | Buyurtma xulosasida (masalan: «Yetkazib berish — bepul. To‘lov buyurtma yetkazib berilganda amalga oshiriladi.») |
 | Minimal buyurtma | Bir buyurtmadagi eng kam umumiy son (masalan: 2 ta). Mahsulot kartasida ko‘rsatiladi, kamroq bo‘lsa buyurtma berib bo‘lmaydi |
 | Shikastlangan idish jarimasi | Mijozga bo‘sh idish qadamida va xulosada ogohlantirish (masalan: 40 000 so‘m). Summaga qo‘shilmaydi, kuryer joyida tekshirib oladi. 0 — ko‘rsatilmaydi |
+| Eslatma (soatdan keyin) | Botga kirib buyurtma bermagan mijozga necha soatdan keyin bir marta eslatma yuborilsin (standart: 3). Faqat 09:00–21:00 oralig‘ida yuboriladi. 0 — o‘chirilgan |
+| Eslatma matni | Eslatmaning o‘z matningiz. Bo‘sh bo‘lsa, standart matn yuboriladi |
 | Bitta mahsulotdan eng ko‘p / Eng ko‘p bo‘sh idish | Bir buyurtmadagi cheklovlar |
 
 Qiymatni o‘chirish uchun «-» yuboring.

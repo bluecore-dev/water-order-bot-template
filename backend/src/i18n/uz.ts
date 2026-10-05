@@ -47,6 +47,13 @@ export const uz = {
     hint: 'Asosiy menyu 👇',
   },
 
+  engage: {
+    orderButton: '🛒 Buyurtma berish',
+    reminder: (company: string) =>
+      `💧 <b>${e(company)}</b>\n\nToza ichimlik suvi kerakmi? Bir necha bosishda buyurtma bering — kuryer eshigingizgacha olib keladi 🚚\n\nBoshlash uchun pastdagi tugmani bosing 👇`,
+    customReminder: (text: string) => e(text),
+  },
+
   catalog: {
     empty: '😔 Hozircha sotuvda mahsulot yo‘q. Keyinroq urinib ko‘ring yoki biz bilan bog‘laning: ☎️ Aloqa',
     choose: '💧 <b>Mahsulotni tanlang:</b>',
@@ -101,9 +108,10 @@ export const uz = {
     sendLocation: '📍 Lokatsiyani yuborish',
     askAddressDetails:
       '🏢 Uy, podyezd, qavat, xonadon raqami yoki mo‘ljalni yozing.\n\nKerak bo‘lmasa «⏭ O‘tkazib yuborish» ni bosing.',
+    locationResolved: (label: string) => `📍 Manzil aniqlandi: <b>${e(label)}</b>`,
     invalidAddress: '⚠️ Manzil juda qisqa yoki juda uzun. Iltimos, aniqroq yozing (3–300 belgi).',
     locationOnly: (lat: number, lng: number) => `Lokatsiya: ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
-    locationWithDetails: (details: string) => `${details} (lokatsiya yuborilgan)`,
+    locationWithDetails: (place: string, details: string) => `${place} — ${details}`,
     savedAddressButton: (title: string) => `🏠 ${title}`,
     review: '📋 Buyurtmangizni tekshirib, tasdiqlang 👇',
     bottlesChosen: (n: number) => `♻️ Bo‘sh idishlar: <b>${n} ta</b>`,
@@ -214,6 +222,7 @@ export const uz = {
     settings: '⚙️ Sozlamalar',
     amocrm: '🔗 amoCRM',
     admins: '👥 Adminlar',
+    broadcast: '📣 Xabar yuborish',
     backToMenu: '⬅️ Boshqaruv',
     saved: '✅ Saqlandi.',
     inputCancelHint: 'Bekor qilish uchun «❌ Bekor qilish» ni bosing.',
@@ -283,6 +292,8 @@ export const uz = {
       customers: number;
       amoPending: number;
       amoFailed: number;
+      botUsers: number;
+      blockedUsers: number;
     }) =>
       '📊 <b>Statistika</b>\n\n' +
       `Bugun: <b>${s.today.orders}</b> ta · ${sum(s.today.amount)}\n` +
@@ -291,6 +302,7 @@ export const uz = {
       `Jami buyurtmalar: ${s.totalOrders}\n` +
       `Yangi (ko‘rib chiqilmagan): ${s.newOrders}\n` +
       `Buyurtma bergan mijozlar: ${s.customers}\n` +
+      `Bot foydalanuvchilari: ${s.botUsers} (botni bloklagan: ${s.blockedUsers})\n` +
       `Sotuvdagi mahsulotlar: ${s.activeProducts}\n\n` +
       `amoCRM navbatida: ${s.amoPending} · xato bilan: ${s.amoFailed}`,
     refresh: '🔄 Yangilash',
@@ -347,6 +359,8 @@ export const uz = {
       min_order_quantity: 'Minimal buyurtma',
       max_empty_bottles: 'Eng ko‘p bo‘sh idish',
       damaged_bottle_fine: 'Shikastlangan idish jarimasi',
+      reminder_after_hours: 'Eslatma (soatdan keyin)',
+      reminder_text: 'Eslatma matni',
     } satisfies Record<SettingKey, string>,
     settingHints: {
       company_name: 'Masalan: <i>Toza Suv</i>. Salomlashuv va aloqa bo‘limida ko‘rinadi.',
@@ -360,6 +374,9 @@ export const uz = {
       max_empty_bottles: '1 dan 10000 gacha butun son.',
       damaged_bottle_fine:
         'So‘mda, masalan: <code>40000</code>. Buyurtma summasiga qo‘shilmaydi — mijozga bo‘sh idish qadamida va xulosada ogohlantirish sifatida ko‘rsatiladi. <code>0</code> — ko‘rsatilmaydi.',
+      reminder_after_hours:
+        'Botga kirib buyurtma bermagan mijozga necha soatdan keyin bir marta eslatma yuborilsin (masalan: <code>3</code>). Eslatmalar faqat 09:00–21:00 oralig‘ida ketadi. <code>0</code> — o‘chirilgan.',
+      reminder_text: 'Eslatmaning o‘z matningiz. Bo‘sh bo‘lsa, standart matn yuboriladi. Ostiga «🛒 Buyurtma berish» tugmasi qo‘shiladi.',
     } satisfies Record<SettingKey, string>,
     askSetting: (label: string, current: string, hint: string, optional: boolean) =>
       `✏️ <b>${e(label)}</b>\n\nHozirgi qiymat: ${current ? e(current) : '—'}\n${hint}\n\n` +
@@ -397,6 +414,28 @@ export const uz = {
     amoConnectHint:
       'Tugmani bosing va amoCRM’da ruxsat bering. Havola 15 daqiqa amal qiladi.',
     amoConnectNeedsHttps: 'OAuth ulash uchun serverda https API_URL kerak.',
+
+    broadcastAsk: (recipients: number, last: string | null) =>
+      '📣 <b>Barcha mijozlarga xabar</b>\n\n' +
+      'Yuboriladigan xabarni shu yerga jo‘nating: matn, rasm yoki video (izoh bilan). ' +
+      'Masalan: chegirma, aksiya yoki yangilik.\n\n' +
+      `Qabul qiluvchilar: <b>${recipients}</b> ta mijoz.` +
+      (last ? `\nOxirgi xabar: ${last}` : '') +
+      '\n\nXabar ostiga «🛒 Buyurtma berish» tugmasi avtomatik qo‘shiladi.',
+    broadcastLast: (date: string, sent: number, total: number) => `${date} — ${sent}/${total} ta yuborilgan`,
+    broadcastUnsupported: '⚠️ Bu turdagi xabarni yuborib bo‘lmaydi. Matn, rasm, video yoki fayl yuboring.',
+    broadcastPreviewTitle: '👆 Mijozlar xabarni shunday ko‘radi.',
+    broadcastConfirm: (recipients: number) => `📣 Xabar <b>${recipients}</b> ta mijozga yuborilsinmi?`,
+    broadcastSend: '✅ Yuborish',
+    broadcastStarted: (recipients: number) =>
+      `🚀 Yuborish boshlandi: ${recipients} ta mijoz. Tugagach natijani shu yerga yozaman.`,
+    broadcastBusy: '⏳ Oldingi xabar hali yuborilmoqda. U tugagach qayta urinib ko‘ring.',
+    broadcastNobody: 'Hozircha xabar yuboriladigan mijoz yo‘q.',
+    broadcastDone: (sent: number, blocked: number, failed: number, total: number) =>
+      `✅ <b>Xabar yuborildi</b>\n\nYetkazildi: <b>${sent}</b> / ${total}\n` +
+      `Botni bloklagan: ${blocked}\n` +
+      (failed ? `Xato: ${failed}\n` : ''),
+    broadcastFailed: '❌ Xabarni yuborib bo‘lmadi: asl xabar o‘chirilgan bo‘lishi mumkin. Qaytadan yuboring.',
 
     adminsTitle: '👥 <b>Adminlar</b>\n\n👑 — bosh admin (.env dagi ADMIN_TELEGRAM_IDS)',
     adminLine: (index: number, name: string, telegramId: string, isSuper: boolean) =>
@@ -457,6 +496,7 @@ export const uz = {
     notePhone: (phone: string) => `Telefon: ${phone}`,
     noteAddress: (address: string) => `Manzil: ${address}`,
     noteMap: (link: string) => `Xarita: ${link}`,
+    noteCoordinates: (lat: number, lng: number) => `Koordinatalar: ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
     noteTelegram: (id: string, username: string | null) => `Telegram: ${id}${username ? ` (@${username})` : ''}`,
     noteCustomer: (name: string) => `Mijoz: ${name}`,
   },

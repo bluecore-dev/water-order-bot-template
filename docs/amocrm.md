@@ -9,8 +9,8 @@ Only the backend talks to amoCRM. Credentials never reach Telegram or any fronte
 2. **Lead**: `Buyurtma #1042`, `price` = order total, linked to the contact, in the configured
    pipeline/status, optional responsible user and tags, and optional custom fields.
 3. **Note** on the lead: full order (items with snapshot prices, empty bottles, total, customer,
-   phone, address, Yandex map link, Telegram id/username). Operators see everything even with
-   no custom fields configured.
+   phone, address with the place name, Yandex map link, exact coordinates, Telegram
+   id/username). Operators see everything even with no custom fields configured.
 
 The amoCRM ids are stored on the order (`amocrmContactId`, `amocrmLeadId`) and on each
 `AmocrmSync` row.

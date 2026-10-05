@@ -20,8 +20,11 @@ export class CatalogFlow {
     private readonly ui: BotUi,
   ) {}
 
-  /** One active product → its card directly (fewest taps); several → a pick list. */
-  async showCatalog(ctx: BotContext): Promise<void> {
+  /**
+   * One active product → its card directly (fewest taps); several → a pick list.
+   * `fresh` never edits the pressed message (used under reminders and announcements).
+   */
+  async showCatalog(ctx: BotContext, opts: { fresh?: boolean } = {}): Promise<void> {
     const products = await this.products.listActive();
     if (!products.length) {
       await this.ui.reply(ctx, ctx.t.catalog.empty);
@@ -36,7 +39,8 @@ export class CatalogFlow {
     for (const p of products) kb.text(ctx.t.catalog.productButton(p.name, p.price), CB.product(p.id)).row();
     const cartCount = ctx.session.cart.reduce((s, i) => s + i.quantity, 0);
     if (cartCount > 0) kb.text(ctx.t.cart.button(cartCount), CB.cart);
-    await this.ui.editOrReply(ctx, ctx.t.catalog.choose, kb);
+    if (opts.fresh) await this.ui.reply(ctx, ctx.t.catalog.choose, kb);
+    else await this.ui.editOrReply(ctx, ctx.t.catalog.choose, kb);
   }
 
   async showProduct(ctx: BotContext, productId: number): Promise<void> {

@@ -41,6 +41,8 @@ Decisions that differ from, or refine, the original specification:
 | D9 | Saved phone is reused silently at checkout. The address is always asked, with saved addresses one tap away. | Fewest steps without risking a delivery to the wrong address. |
 | D10 | `Order.idempotencyKey` (one per checkout) plus a 12 h checkout expiry. | A double tap or a stale "Confirm" button never creates a second order. |
 | D11 | Additions to the schema: `BotSession`, `IntegrationToken`, `User.language`, `Order.customerName`, `Order.idempotencyKey`, `Product.imageFileId/imageFileBotId`, `AmocrmSync.attempts/nextAttemptAt/lastAttemptAt`, `AdminUser.telegramId` (instead of email/password). | Required by D2, D5, D6, D8 and D10. |
+| D13 | Reverse geocoding through `GeocodingService`: OpenStreetMap Nominatim by default (free, no key, 1 request per second, cached), Yandex Geocoder when `YANDEX_GEOCODER_API_KEY` is set. It is best effort, so a failure falls back to coordinates. | Operators and couriers need a place name, not numbers. Coordinates are still stored and sent to amoCRM (map link + coordinates in the note). |
+| D14 | Reminders (one per user, daytime only) and admin broadcasts run in-process (`@Interval`, background loop). The broadcast cursor is persisted in `Broadcast`. `User.lastActivityAt/reminderSentAt/botBlockedAt` track state. | Lets the business re-engage users without a queue system. Blocked users are skipped automatically. |
 | D12 | The UI is Uzbek only, with a typed locale structure (`src/i18n`). | Russian/English: add `ru.ts` implementing `Messages`. The compiler enforces completeness. |
 
 ## Data model

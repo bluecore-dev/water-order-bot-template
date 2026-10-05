@@ -47,6 +47,12 @@ export const envSchema = z
     ADMIN_TELEGRAM_IDS: telegramIdList,
     ORDER_NOTIFY_CHAT_ID: z.preprocess(emptyToUndefined, z.string().regex(/^-?\d+$/).optional()),
 
+    // Reverse geocoding: turns a shared location into a street/district name.
+    GEOCODER_PROVIDER: z.enum(['nominatim', 'yandex', 'none']).default('nominatim'),
+    NOMINATIM_URL: z.string().url().default('https://nominatim.openstreetmap.org'),
+    GEOCODER_EMAIL: optionalString,
+    YANDEX_GEOCODER_API_KEY: optionalString,
+
     STORAGE_DRIVER: z.enum(['local']).default('local'),
     STORAGE_LOCAL_DIR: z.string().default('./uploads'),
 
@@ -88,6 +94,10 @@ export const envSchema = z
       if (!env.BOT_WEBHOOK_SECRET || !/^[A-Za-z0-9_-]{16,256}$/.test(env.BOT_WEBHOOK_SECRET)) {
         issue('BOT_WEBHOOK_SECRET', 'Webhook mode needs BOT_WEBHOOK_SECRET: 16-256 chars of A-Z a-z 0-9 _ -');
       }
+    }
+
+    if (env.GEOCODER_PROVIDER === 'yandex' && !env.YANDEX_GEOCODER_API_KEY) {
+      issue('YANDEX_GEOCODER_API_KEY', 'GEOCODER_PROVIDER=yandex needs YANDEX_GEOCODER_API_KEY');
     }
 
     const oauthParts = [env.AMOCRM_CLIENT_ID, env.AMOCRM_CLIENT_SECRET, env.AMOCRM_REDIRECT_URI];

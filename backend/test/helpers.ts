@@ -56,6 +56,8 @@ export interface TgUser {
 export class FakeTelegram {
   readonly calls: ApiCall[] = [];
   readonly bot: Bot<BotContext>;
+  /** chat ids for which Telegram answers with an error (e.g. 403 "bot was blocked"). */
+  readonly failFor = new Map<number, { error_code: number; description: string }>();
   private messageId = 1000;
   private updateId = 1;
 
@@ -73,6 +75,8 @@ export class FakeTelegram {
     } as any);
     this.bot.api.config.use(async (_prev, method, payload) => {
       this.calls.push({ method, payload: payload as Record<string, any> });
+      const failure = this.failFor.get(Number((payload as Record<string, any>).chat_id));
+      if (failure) return { ok: false, ...failure } as any;
       return { ok: true, result: this.result(method, payload as Record<string, any>) } as any;
     });
   }
@@ -85,6 +89,8 @@ export class FakeTelegram {
         return { ...base, text: payload.text };
       case 'sendPhoto':
         return { ...base, caption: payload.caption, photo: [{ file_id: 'sent-photo-file-id', file_unique_id: 'u1', width: 800, height: 800 }] };
+      case 'copyMessage':
+        return { message_id: ++this.messageId };
       case 'getFile':
         return { file_id: payload.file_id, file_unique_id: 'f1', file_path: 'photos/file_1.jpg', file_size: 1000 };
       default:

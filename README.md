@@ -8,7 +8,10 @@ in-bot admin mode and amoCRM integration.
 - **Customers** order 18.9 L water in a regular Telegram bot (no Mini App): pick products and
   quantity, say how many empty bottles they return, share their phone and address, confirm.
 - **Admins** manage products, prices, photos and contact settings **inside the same bot**
-  (`⚙️ Boshqaruv`). There is no separate web panel. See [docs/architecture.md](docs/architecture.md#decisions).
+  (`⚙️ Boshqaruv`), and can **broadcast news/discounts** to all customers. There is no separate
+  web panel. See [docs/architecture.md](docs/architecture.md#decisions).
+- People who open the bot but don't order get **one daytime reminder** with an order button.
+- A shared **location is turned into a street/district name** (OpenStreetMap, or Yandex with a key).
 - **amoCRM** gets every order (contact found or created by phone, lead with the order, full note).
   If amoCRM is down, orders are kept locally and retried. Nothing is lost.
 
@@ -87,7 +90,7 @@ Open the bot in Telegram and send `/start`. If your Telegram id is in `ADMIN_TEL
 
 ## Tests
 
-`npm test` runs 90 tests: unit tests (pricing, phone, crypto, payloads, env) and integration
+`npm test` runs 104 tests: unit tests (pricing, phone, crypto, payloads, env) and integration
 tests against a real PostgreSQL test database. Those cover order creation and price snapshots,
 idempotency, the amoCRM worker against a fake amoCRM (success, failure, retry, no duplicates,
 token refresh), and **complete bot conversations** driven through grammY with a fake Telegram API.

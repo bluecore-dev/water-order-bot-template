@@ -32,6 +32,12 @@ enum AmocrmEntityType {
   NOTE
 }
 
+enum BroadcastStatus {
+  SENDING
+  DONE
+  FAILED
+}
+
 enum SyncStatus {
   PENDING
   PROCESSING
@@ -47,12 +53,19 @@ model User {
   lastName         String?
   phone            String? // E.164, e.g. +998901234567
   language         String    @default("uz")
+  // Last interaction with the bot (updated at most every few minutes).
+  lastActivityAt   DateTime  @default(now())
+  // "You haven't ordered yet" reminder — sent at most once per user.
+  reminderSentAt   DateTime?
+  // Set when Telegram says the user blocked the bot; cleared when they write again.
+  botBlockedAt     DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   addresses        Address[]
   orders           Order[]
 
   @@index([phone])
+  @@index([lastActivityAt])
 }
 
 model Product {
@@ -193,4 +206,23 @@ model BotSession {
   updatedAt DateTime @updatedAt
 
   @@index([updatedAt])
+}
+
+// Admin announcements (news, discounts) copied to every customer. `cursorUserId` lets an
+// interrupted broadcast resume after a restart without starting over.
+model Broadcast {
+  id              Int             @id @default(autoincrement())
+  createdById     BigInt
+  sourceChatId    BigInt
+  sourceMessageId Int
+  status          BroadcastStatus @default(SENDING)
+  total           Int             @default(0)
+  sent            Int             @default(0)
+  blocked         Int             @default(0)
+  failed          Int             @default(0)
+  cursorUserId    Int             @default(0)
+  createdAt       DateTime        @default(now())
+  finishedAt      DateTime?
+
+  @@index([status])
 }

@@ -90,7 +90,7 @@ export function buildNoteText(order: OrderFull, t: Messages, timeZone: string): 
     t.crm.noteCustomer(customerName(order, t)),
     t.crm.notePhone(formatPhone(order.phone)),
     t.crm.noteAddress(order.deliveryAddress),
-    ...(link ? [t.crm.noteMap(link)] : []),
+    ...(link ? [t.crm.noteMap(link), t.crm.noteCoordinates(order.latitude!, order.longitude!)] : []),
     t.crm.noteTelegram(order.user.telegramId.toString(), order.user.telegramUsername),
   ].join('\n');
 }

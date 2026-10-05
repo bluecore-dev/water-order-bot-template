@@ -39,6 +39,12 @@ export interface AppConfig {
     driver: 'local';
     localDir: string;
   };
+  geocoder: {
+    provider: 'nominatim' | 'yandex' | 'none';
+    nominatimUrl: string;
+    email?: string;
+    yandexApiKey?: string;
+  };
   amocrm: {
     authMode: AmocrmAuthMode;
     domain?: string;
@@ -90,6 +96,12 @@ export function buildConfig(env: Env): AppConfig {
     storage: {
       driver: env.STORAGE_DRIVER,
       localDir: env.STORAGE_LOCAL_DIR,
+    },
+    geocoder: {
+      provider: env.GEOCODER_PROVIDER,
+      nominatimUrl: env.NOMINATIM_URL.replace(/\/+$/, ''),
+      email: env.GEOCODER_EMAIL,
+      yandexApiKey: env.YANDEX_GEOCODER_API_KEY,
     },
     amocrm: {
       authMode,

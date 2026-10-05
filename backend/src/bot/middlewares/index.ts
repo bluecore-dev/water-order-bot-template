@@ -52,7 +52,7 @@ export function rateLimit(opts: { windowMs: number; max: number }): MiddlewareFn
 export function userContext(users: UsersService, admins: AdminsService): MiddlewareFn<BotContext> {
   return async (ctx, next) => {
     const from = ctx.from!;
-    ctx.user = await users.upsertFromTelegram(from);
+    ctx.user = await users.touchActivity(await users.upsertFromTelegram(from));
     ctx.t = getMessages(ctx.user.language);
     ctx.adminRole = await admins.getRole(from.id);
     await next();

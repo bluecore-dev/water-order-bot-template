@@ -13,6 +13,7 @@ import { BotContext, createInitialSession } from './context';
 import { AddressesHandler } from './handlers/addresses.handler';
 import { AdminAdminsHandler } from './handlers/admin/admin-admins.handler';
 import { AdminAmocrmHandler } from './handlers/admin/admin-amocrm.handler';
+import { AdminBroadcastHandler } from './handlers/admin/admin-broadcast.handler';
 import { AdminOrdersHandler } from './handlers/admin/admin-orders.handler';
 import { AdminProductsHandler } from './handlers/admin/admin-products.handler';
 import { AdminSettingsHandler } from './handlers/admin/admin-settings.handler';
@@ -27,6 +28,7 @@ import { StartHandler } from './handlers/start.handler';
 import { privateChatOnly, rateLimit, timing, userContext } from './middlewares';
 import { PrismaSessionStorage } from './session/prisma-session.storage';
 import { StateRouter } from './state-router';
+import { BotApiHolder } from './services/bot-api.holder';
 
 export type BotStatus = 'disabled' | 'starting' | 'running' | 'error' | 'stopped';
 
@@ -51,6 +53,7 @@ export class BotService implements OnApplicationBootstrap, OnModuleDestroy {
     private readonly prisma: PrismaService,
     private readonly users: UsersService,
     private readonly admins: AdminsService,
+    private readonly holder: BotApiHolder,
     start: StartHandler,
     admin: AdminHandler,
     product: ProductHandler,
@@ -63,6 +66,7 @@ export class BotService implements OnApplicationBootstrap, OnModuleDestroy {
     adminSettings: AdminSettingsHandler,
     adminAmocrm: AdminAmocrmHandler,
     adminAdmins: AdminAdminsHandler,
+    adminBroadcast: AdminBroadcastHandler,
     fallback: FallbackHandler,
   ) {
     // Order matters: the admin gate precedes admin buttons; fallback (free input router) is last.
@@ -79,6 +83,7 @@ export class BotService implements OnApplicationBootstrap, OnModuleDestroy {
       adminSettings,
       adminAmocrm,
       adminAdmins,
+      adminBroadcast,
       fallback,
     ];
   }
@@ -128,6 +133,7 @@ export class BotService implements OnApplicationBootstrap, OnModuleDestroy {
     });
 
     this.bot = bot;
+    this.holder.bot = bot;
     return bot;
   }
 

@@ -29,6 +29,13 @@ export class ProductHandler implements BotHandler {
       await this.catalog.showCatalog(ctx);
     });
 
+    // "🛒 Buyurtma berish" under reminders and announcements: keep that message intact.
+    bot.callbackQuery(CB.startOrder, async (ctx) => {
+      await this.ui.answer(ctx);
+      this.ui.resetFlow(ctx);
+      await this.catalog.showCatalog(ctx, { fresh: true });
+    });
+
     bot.callbackQuery(/^prd:(\d+)$/, async (ctx) => {
       await this.ui.answer(ctx);
       await this.catalog.showProduct(ctx, intParam(ctx.match, 1));

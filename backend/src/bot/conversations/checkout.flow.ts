@@ -5,6 +5,7 @@ import { isDomainError } from '../../common/errors';
 import { formatPhone } from '../../common/utils/phone';
 import { truncate } from '../../common/utils/format';
 import { AddressesService } from '../../modules/addresses/addresses.service';
+import { GeocodingService } from '../../modules/geocoding/geocoding.service';
 import { OrdersService } from '../../modules/orders/orders.service';
 import { SettingsService } from '../../modules/settings/settings.service';
 import { UsersService } from '../../modules/users/users.service';
@@ -34,8 +35,29 @@ export class CheckoutFlow {
     private readonly addresses: AddressesService,
     private readonly settings: SettingsService,
     private readonly catalog: CatalogFlow,
+    private readonly geocoding: GeocodingService,
     private readonly ui: BotUi,
   ) {}
+
+  /** Location → pending place (with its street/district name when the geocoder knows it). */
+  async receiveLocation(ctx: BotContext, latitude: number, longitude: number): Promise<void> {
+    const label = (await this.geocoding.reverse(latitude, longitude)) ?? undefined;
+    ctx.session.pendingLocation = { latitude, longitude, label };
+    const prompt = label
+      ? `${ctx.t.checkout.locationResolved(label)}\n\n${ctx.t.checkout.askAddressDetails}`
+      : ctx.t.checkout.askAddressDetails;
+    await this.ui.reply(ctx, prompt, skipKeyboard(ctx.t));
+  }
+
+  /** Final address text for a shared location: place name (or coordinates) + optional details. */
+  static locationAddress(
+    t: BotContext['t'],
+    pending: { latitude: number; longitude: number; label?: string },
+    details: string | null,
+  ): string {
+    if (!details) return pending.label ?? t.checkout.locationOnly(pending.latitude, pending.longitude);
+    return pending.label ? t.checkout.locationWithDetails(pending.label, details) : details;
+  }
 
   isActive(ctx: BotContext): boolean {
     const { idempotencyKey, startedAt } = ctx.session.checkout;
@@ -158,9 +180,8 @@ export class CheckoutFlow {
   async onAddressInput(ctx: BotContext): Promise<void> {
     const location = ctx.message?.location;
     if (location) {
-      ctx.session.pendingLocation = { latitude: location.latitude, longitude: location.longitude };
       ctx.session.state = 'checkout:address_details';
-      await this.ui.reply(ctx, ctx.t.checkout.askAddressDetails, skipKeyboard(ctx.t));
+      await this.receiveLocation(ctx, location.latitude, location.longitude);
       return;
     }
 
@@ -193,8 +214,7 @@ export class CheckoutFlow {
   async onAddressDetails(ctx: BotContext): Promise<void> {
     const location = ctx.message?.location;
     if (location) {
-      ctx.session.pendingLocation = { latitude: location.latitude, longitude: location.longitude };
-      await this.ui.reply(ctx, ctx.t.checkout.askAddressDetails, skipKeyboard(ctx.t));
+      await this.receiveLocation(ctx, location.latitude, location.longitude);
       return;
     }
     const pending = ctx.session.pendingLocation;
@@ -205,11 +225,13 @@ export class CheckoutFlow {
       await this.ui.reply(ctx, ctx.t.checkout.askAddressDetails, skipKeyboard(ctx.t));
       return;
     }
+    const coords = { latitude: pending.latitude, longitude: pending.longitude };
     if (isSkip(text)) {
-      return this.finishAddress(ctx, { text: ctx.t.checkout.locationOnly(pending.latitude, pending.longitude), ...pending });
+      return this.finishAddress(ctx, { text: CheckoutFlow.locationAddress(ctx.t, pending, null), ...coords });
     }
     try {
-      await this.finishAddress(ctx, { text: AddressesService.validateText(text), ...pending });
+      const full = CheckoutFlow.locationAddress(ctx.t, pending, AddressesService.validateText(text));
+      await this.finishAddress(ctx, { text: AddressesService.validateText(full), ...coords });
     } catch (err) {
       if (!isDomainError(err, 'VALIDATION')) throw err;
       await this.ui.reply(ctx, ctx.t.checkout.invalidAddress);

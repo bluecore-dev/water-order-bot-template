@@ -55,8 +55,9 @@ export class AdminHandler implements BotHandler {
       .text(t.orders, CB.admin.orders(0))
       .text(t.settings, CB.admin.settings)
       .row()
+      .text(t.broadcast, CB.admin.broadcast)
       .text(t.amocrm, CB.admin.amocrm);
-    if (isSuperAdmin(ctx)) kb.text(t.admins, CB.admin.admins);
+    if (isSuperAdmin(ctx)) kb.row().text(t.admins, CB.admin.admins);
     await this.ui.editOrReply(ctx, t.menuTitle, kb);
   }
 
@@ -72,6 +73,8 @@ export class AdminHandler implements BotHandler {
       customers: s.customers,
       amoPending: s.amocrm.pendingOrders,
       amoFailed: s.amocrm.failedOrders,
+      botUsers: s.botUsers,
+      blockedUsers: s.blockedUsers,
     });
     const kb = new InlineKeyboard().text(ctx.t.admin.refresh, CB.admin.stats).row().text(ctx.t.admin.backToMenu, CB.admin.menu);
     await this.ui.editOrReply(ctx, text, kb);

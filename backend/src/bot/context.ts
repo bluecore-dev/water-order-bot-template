@@ -20,6 +20,7 @@ export const BOT_STATES = [
   'admin:product:edit',
   'admin:setting:edit',
   'admin:admins:add',
+  'admin:broadcast:compose',
 ] as const;
 
 export type BotState = (typeof BOT_STATES)[number];
@@ -54,6 +55,8 @@ export interface AdminDraft {
   field?: AdminProductField;
   settingKey?: SettingKey;
   newProduct?: { name?: string; price?: number; description?: string | null };
+  /** Message the admin composed for a broadcast (copied to every customer). */
+  broadcast?: { chatId: number; messageId: number };
 }
 
 export interface SessionData {
@@ -61,7 +64,7 @@ export interface SessionData {
   cart: CartItem[];
   checkout: CheckoutDraft;
   /** Location received before the optional "house/apartment" clarification. */
-  pendingLocation?: { latitude: number; longitude: number };
+  pendingLocation?: { latitude: number; longitude: number; label?: string };
   /** Reply-keyboard label → saved address id, for the address step. */
   addressChoices?: Record<string, number>;
   admin?: AdminDraft;
