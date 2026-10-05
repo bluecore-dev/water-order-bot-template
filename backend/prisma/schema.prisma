@@ -1,0 +1,196 @@
+// Water order system — database schema.
+// Money is stored as whole so‘m (Int): UZS has no minor unit in circulation.
+// Historical prices live in OrderItem snapshots and never follow Product changes.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  PROCESSING
+  ASSIGNED
+  DELIVERING
+  DELIVERED
+  CANCELLED
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+}
+
+enum AmocrmEntityType {
+  CONTACT
+  LEAD
+  NOTE
+}
+
+enum SyncStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id               Int       @id @default(autoincrement())
+  telegramId       BigInt    @unique
+  telegramUsername String?
+  firstName        String?
+  lastName         String?
+  phone            String? // E.164, e.g. +998901234567
+  language         String    @default("uz")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  addresses        Address[]
+  orders           Order[]
+
+  @@index([phone])
+}
+
+model Product {
+  id             Int         @id @default(autoincrement())
+  name           String
+  description    String?
+  price          Int
+  // Storage key/URL of the image (see StorageService). Never binary data.
+  imageUrl       String?
+  // Telegram file_id cache. file_ids are bot-specific, so the owning bot id is stored too:
+  // after a token switch the image is re-uploaded from storage instead of failing.
+  imageFileId    String?
+  imageFileBotId String?
+  isActive       Boolean     @default(true)
+  sortOrder      Int         @default(0)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  orderItems     OrderItem[]
+
+  @@index([isActive, sortOrder])
+}
+
+model Address {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  title     String
+  address   String
+  latitude  Float?
+  longitude Float?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Order {
+  id               Int          @id @default(autoincrement())
+  // Human-facing number (#1001…). Sequence start is set in the initial migration.
+  orderNumber      Int          @unique @default(autoincrement())
+  userId           Int
+  customerName     String?
+  phone            String
+  deliveryAddress  String
+  latitude         Float?
+  longitude        Float?
+  emptyBottleCount Int          @default(0)
+  totalAmount      Int
+  status           OrderStatus  @default(NEW)
+  amocrmLeadId     Int?
+  amocrmContactId  Int?
+  // One checkout = one order, even if the confirm button is pressed twice.
+  idempotencyKey   String?      @unique
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  user             User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items            OrderItem[]
+  amocrmSyncs      AmocrmSync[]
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id                  Int      @id @default(autoincrement())
+  orderId             Int
+  productId           Int?
+  productNameSnapshot String
+  unitPrice           Int
+  quantity            Int
+  subtotal            Int
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product             Product? @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+// Bot administrators added at runtime. Super admins come from ADMIN_TELEGRAM_IDS and are
+// always allowed, whether or not they have a row here.
+model AdminUser {
+  id         Int       @id @default(autoincrement())
+  telegramId BigInt    @unique
+  name       String?
+  role       AdminRole @default(ADMIN)
+  isActive   Boolean   @default(true)
+  addedById  BigInt?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Setting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+// Outbox + sync log for amoCRM. Rows are created in the same transaction as the order,
+// so an order can never exist without a pending sync. One row per order per entity.
+model AmocrmSync {
+  id            Int              @id @default(autoincrement())
+  orderId       Int
+  entityType    AmocrmEntityType
+  entityId      Int?
+  status        SyncStatus       @default(PENDING)
+  attempts      Int              @default(0)
+  nextAttemptAt DateTime?        @default(now())
+  lastAttemptAt DateTime?
+  errorMessage  String?
+  syncedAt      DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  order         Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, entityType])
+  @@index([status, nextAttemptAt])
+}
+
+// OAuth tokens for external integrations, encrypted with ENCRYPTION_KEY (AES-256-GCM).
+model IntegrationToken {
+  id            Int      @id @default(autoincrement())
+  provider      String   @unique
+  accessToken   String
+  refreshToken  String
+  expiresAt     DateTime
+  accountDomain String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// grammY session storage: cart and conversation step survive restarts without Redis.
+model BotSession {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  @@index([updatedAt])
+}

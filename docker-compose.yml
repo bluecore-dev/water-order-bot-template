@@ -1,0 +1,42 @@
+# Local development:
+#   docker compose up -d                 → PostgreSQL only; run the backend with `npm run dev`
+#   docker compose --profile full up -d  → PostgreSQL + backend container
+# If a local PostgreSQL already uses 5432: POSTGRES_PORT=5433 docker compose up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: water_bot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-water_bot_dev}
+      POSTGRES_DB: water_bot
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U water_bot -d water_bot"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    profiles: ["full"]
+    build: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      DATABASE_URL: postgresql://water_bot:${POSTGRES_PASSWORD:-water_bot_dev}@postgres:5432/water_bot?schema=public
+      HOST: 0.0.0.0
+      STORAGE_LOCAL_DIR: /app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${PORT:-3020}:3020"
+    volumes:
+      - uploads:/app/uploads
+
+volumes:
+  pgdata:
+  uploads:

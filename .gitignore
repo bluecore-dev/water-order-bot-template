@@ -1,0 +1,22 @@
+# Dependencies & build output
+node_modules/
+dist/
+*.tsbuildinfo
+coverage/
+
+# Secrets — never commit real environment files
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Runtime data
+backend/uploads/
+backend/test/.uploads/
+*.log
+logs/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/

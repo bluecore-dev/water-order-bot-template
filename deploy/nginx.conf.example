@@ -1,0 +1,25 @@
+# /etc/nginx/sites-available/<project>   (own file per project — never edit other sites)
+# Needed only for webhook mode and the amoCRM OAuth callback. Polling mode needs no Nginx.
+# After creating:  ln -s ../sites-available/<project> /etc/nginx/sites-enabled/
+#                  nginx -t && systemctl reload nginx
+#                  certbot --nginx -d api.example.com
+server {
+    listen 80;
+    server_name api.example.com;
+
+    # Only the API is exposed; everything else is 404.
+    location /api/ {
+        proxy_pass http://127.0.0.1:3020;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 30s;
+        client_max_body_size 1m;
+    }
+
+    location / {
+        return 404;
+    }
+}
