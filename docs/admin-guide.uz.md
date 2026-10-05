@@ -56,8 +56,9 @@ Buyurtmalar bilan asosiy ish (tasdiqlash, kuryer biriktirish) **amoCRM’da** ol
 | To‘lov izohi | Buyurtma xulosasida (masalan: «Yetkazib berish — bepul. To‘lov buyurtma yetkazib berilganda amalga oshiriladi.») |
 | Minimal buyurtma | Bir buyurtmadagi eng kam umumiy son (masalan: 2 ta). Mahsulot kartasida ko‘rsatiladi, kamroq bo‘lsa buyurtma berib bo‘lmaydi |
 | Shikastlangan idish jarimasi | Mijozga bo‘sh idish qadamida va xulosada ogohlantirish (masalan: 40 000 so‘m). Summaga qo‘shilmaydi, kuryer joyida tekshirib oladi. 0 — ko‘rsatilmaydi |
-| Eslatma (soatdan keyin) | Botga kirib buyurtma bermagan mijozga necha soatdan keyin bir marta eslatma yuborilsin (standart: 3). Faqat 09:00–21:00 oralig‘ida yuboriladi. 0 — o‘chirilgan |
-| Eslatma matni | Eslatmaning o‘z matningiz. Bo‘sh bo‘lsa, standart matn yuboriladi |
+| 1-eslatma (daqiqa) | Mijoz /start bosib, hech narsa yozmasa yoki tugma bosmasa, necha daqiqadan keyin 1-eslatma boradi (standart: 10). 0 — yo‘q |
+| 2-eslatma (daqiqa) | /start’dan necha daqiqa keyin 2-eslatma (oxirgisi) boradi (standart: 60). 0 — yo‘q |
+| 1-eslatma matni, 2-eslatma matni | Eslatmalarning o‘z matningiz. Bo‘sh bo‘lsa, standart matn yuboriladi |
 | Bitta mahsulotdan eng ko‘p / Eng ko‘p bo‘sh idish | Bir buyurtmadagi cheklovlar |
 
 Qiymatni o‘chirish uchun «-» yuboring.

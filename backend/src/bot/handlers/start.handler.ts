@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Composer } from 'grammy';
 import { formatPhone } from '../../common/utils/phone';
 import { SettingsService } from '../../modules/settings/settings.service';
+import { UsersService } from '../../modules/users/users.service';
 import { BotContext } from '../context';
 import { labelsFor } from '../keyboards';
 import { BotUi } from '../services/bot-ui.service';
@@ -16,11 +17,13 @@ export class StartHandler implements BotHandler {
     private readonly ui: BotUi,
     private readonly settings: SettingsService,
     private readonly profile: BotProfileService,
+    private readonly users: UsersService,
   ) {}
 
   register(bot: Composer<BotContext>, _router: StateRouter): void {
     bot.command('start', async (ctx) => {
       this.ui.resetFlow(ctx);
+      ctx.user = await this.users.startCycle(ctx.user);
       if (this.ui.isAdmin(ctx)) await this.profile.ensureAdminCommands(ctx.from!.id);
       await this.ui.showMainMenu(ctx, ctx.t.menu.welcome(await this.ui.companyName(ctx)));
     });

@@ -46,26 +46,30 @@ enum SyncStatus {
 }
 
 model User {
-  id               Int       @id @default(autoincrement())
-  telegramId       BigInt    @unique
-  telegramUsername String?
-  firstName        String?
-  lastName         String?
-  phone            String? // E.164, e.g. +998901234567
-  language         String    @default("uz")
+  id                Int       @id @default(autoincrement())
+  telegramId        BigInt    @unique
+  telegramUsername  String?
+  firstName         String?
+  lastName          String?
+  phone             String? // E.164, e.g. +998901234567
+  language          String    @default("uz")
   // Last interaction with the bot (updated at most every few minutes).
-  lastActivityAt   DateTime  @default(now())
-  // "You haven't ordered yet" reminder — sent at most once per user.
-  reminderSentAt   DateTime?
+  lastActivityAt    DateTime  @default(now())
+  // Start reminders: after /start, a silent user gets up to two nudges (see ReminderService).
+  startedAt         DateTime?
+  startReminders    Int       @default(0)
+  // Any message or button press after the last /start cancels the remaining reminders.
+  engagedAfterStart Boolean   @default(false)
   // Set when Telegram says the user blocked the bot; cleared when they write again.
-  botBlockedAt     DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  addresses        Address[]
-  orders           Order[]
+  botBlockedAt      DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  addresses         Address[]
+  orders            Order[]
 
   @@index([phone])
   @@index([lastActivityAt])
+  @@index([startedAt])
 }
 
 model Product {

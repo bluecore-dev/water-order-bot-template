@@ -12,8 +12,6 @@ import { createTestApp, FakeTelegram, resetDb, TestApp } from '../helpers';
 const t = getMessages('uz');
 const SUPER_ADMIN_ID = 900000001;
 const BLOCKED = { error_code: 403, description: 'Forbidden: bot was blocked by the user' };
-// 12:00 in Tashkent (UTC+5) — inside the reminder window.
-const NOON_TASHKENT = new Date('2026-10-05T07:00:00Z');
 
 describe('Reminders, announcements and named locations', () => {
   let app: TestApp;
@@ -39,65 +37,106 @@ describe('Reminders, announcements and named locations', () => {
     tg = new FakeTelegram(app.get(BotService));
   });
 
-  const inactiveFor = (telegramId: number, hours: number, now = NOON_TASHKENT) =>
-    app.prisma.user.update({
-      where: { telegramId: BigInt(telegramId) },
-      data: { lastActivityAt: new Date(now.getTime() - hours * 3_600_000) },
-    });
+  const startedAt = async (telegramId: number) =>
+    (await app.prisma.user.findUniqueOrThrow({ where: { telegramId: BigInt(telegramId) } })).startedAt!;
+  const after = (base: Date, minutes: number) => new Date(base.getTime() + minutes * 60_000);
   const sentTo = (chatId: number, method = 'sendMessage') =>
     tg.calls.filter((c) => c.method === method && Number(c.payload.chat_id) === chatId);
 
-  describe('“you haven’t ordered yet” reminder', () => {
-    it('one reminder after the configured idle time, with an order button', async () => {
+  describe('start reminders: 10 min, 60 min, then silence', () => {
+    it('silent after /start → reminder at 10 min and at 60 min, nothing more; every /start repeats it', async () => {
       await tg.text(ali, '/start');
-      await inactiveFor(ali.id, 4);
+      const t0 = await startedAt(ali.id);
       tg.clear();
 
-      expect(await reminders.runOnce(NOON_TASHKENT)).toBe(1);
-      const [msg] = sentTo(ali.id);
-      expect(msg.payload.text).toContain('Demo Suv');
-      expect(msg.payload.text).toContain('buyurtma bering');
-      expect(msg.payload.reply_markup.inline_keyboard[0][0]).toMatchObject({ text: t.engage.orderButton, callback_data: 'go' });
+      expect(await reminders.runOnce(after(t0, 9))).toBe(0);
+      expect(await reminders.runOnce(after(t0, 10))).toBe(1);
+      const [first] = sentTo(ali.id);
+      expect(first.payload.text).toContain('Toza ichimlik suvi kerakmi');
+      expect(first.payload.text).toContain('Demo Suv');
+      expect(first.payload.reply_markup.inline_keyboard[0][0]).toMatchObject({ text: t.engage.orderButton, callback_data: 'go' });
 
-      // Never twice.
-      expect(await reminders.runOnce(new Date(NOON_TASHKENT.getTime() + 3_600_000))).toBe(0);
+      expect(await reminders.runOnce(after(t0, 30))).toBe(0);
+      expect(await reminders.runOnce(after(t0, 60))).toBe(1);
+      expect(sentTo(ali.id)[1].payload.text).toContain('Buyurtma berishni unutmang');
+
+      expect(await reminders.runOnce(after(t0, 61))).toBe(0);
+      expect(await reminders.runOnce(after(t0, 120))).toBe(0);
+      expect(await reminders.runOnce(after(t0, 24 * 60))).toBe(0);
+
+      await tg.text(ali, '/start'); // a new cycle
+      const t1 = await startedAt(ali.id);
+      expect(await reminders.runOnce(after(t1, 10))).toBe(1);
     });
 
-    it('skips: recently active, customers who ordered, admins, night time, feature off', async () => {
+    it('any message or button press after /start cancels the remaining reminders', async () => {
       await products().create({ name: 'Suv', price: 15000 });
-      await tg.text(ali, '/start'); // active 1h ago → too early
-      await inactiveFor(ali.id, 1);
-      await tg.text(admin, '/start'); // admin
-      await inactiveFor(admin.id, 10);
-      await placeOrder(vali); // already a customer
-      await inactiveFor(vali.id, 10);
+      await tg.text(ali, '/start');
+      await tg.text(ali, t.menu.buy); // pressed a menu button right away
+      await tg.text(vali, '/start');
+      const tv = await startedAt(vali.id);
+      const ta = await startedAt(ali.id);
 
-      expect(await reminders.runOnce(NOON_TASHKENT)).toBe(0);
+      tg.clear();
+      expect(await reminders.runOnce(after(tv, 10))).toBe(1);
+      expect(sentTo(ali.id)).toHaveLength(0);
+      expect(sentTo(vali.id)).toHaveLength(1);
 
-      await tg.text(gani, '/start');
-      await inactiveFor(gani.id, 5, new Date('2026-10-05T18:00:00Z'));
-      expect(await reminders.runOnce(new Date('2026-10-05T18:00:00Z'))).toBe(0); // 23:00 in Tashkent
-
-      await app.get(SettingsService).set('reminder_after_hours', '0');
-      await inactiveFor(gani.id, 5);
-      expect(await reminders.runOnce(NOON_TASHKENT)).toBe(0);
+      await tg.callback(vali, 'go'); // pressed the reminder's own button
+      expect(await reminders.runOnce(after(tv, 60))).toBe(0);
+      expect(await reminders.runOnce(after(ta, 60))).toBe(0);
     });
 
-    it('custom text from settings; a user who blocked the bot is marked', async () => {
-      await app.get(SettingsService).set('reminder_text', 'Bugun 10% chegirma! <3');
+    it('a reminder missed while the bot was offline is not sent late', async () => {
+      await tg.text(ali, '/start');
+      const t0 = await startedAt(ali.id);
+      tg.clear();
+      // At 75 min the 10-min reminder is long overdue: only the 60-min one goes out.
+      expect(await reminders.runOnce(after(t0, 75))).toBe(1);
+      expect(sentTo(ali.id)[0].payload.text).toContain('Buyurtma berishni unutmang');
+
+      await tg.text(vali, '/start');
+      const tv = await startedAt(vali.id);
+      expect(await reminders.runOnce(after(tv, 100))).toBe(0); // both missed by >30 min
+    });
+
+    it('delays are settings; either reminder can be switched off; the second must be later', async () => {
+      const settings = app.get(SettingsService);
+      await expect(settings.set('reminder_second_minutes', '5')).rejects.toMatchObject({ code: 'VALIDATION' });
+
+      await settings.set('reminder_first_minutes', '0');
+      await tg.text(ali, '/start');
+      const ta = await startedAt(ali.id);
+      expect(await reminders.runOnce(after(ta, 10))).toBe(0);
+      expect(await reminders.runOnce(after(ta, 60))).toBe(1);
+
+      await settings.set('reminder_second_minutes', '0');
+      await settings.set('reminder_first_minutes', '15');
+      await tg.text(gani, '/start');
+      const tgani = await startedAt(gani.id);
+      expect(await reminders.runOnce(after(tgani, 15))).toBe(1);
+      expect(await reminders.runOnce(after(tgani, 60))).toBe(0);
+    });
+
+    it('custom texts; a user who blocked the bot is marked, skipped and un-blocked on return', async () => {
+      const settings = app.get(SettingsService);
+      await settings.set('reminder_text', 'Bugun 10% chegirma! <3');
+      await settings.set('reminder_text_2', 'Oxirgi imkoniyat!');
       await tg.text(ali, '/start');
       await tg.text(vali, '/start');
-      await inactiveFor(ali.id, 4);
-      await inactiveFor(vali.id, 4);
+      const t0 = await startedAt(vali.id);
       tg.failFor.set(vali.id, BLOCKED);
       tg.clear();
 
-      expect(await reminders.runOnce(NOON_TASHKENT)).toBe(1);
+      expect(await reminders.runOnce(after(t0, 10))).toBe(1);
       expect(sentTo(ali.id)[0].payload.text).toBe('Bugun 10% chegirma! &lt;3');
       const blocked = await app.prisma.user.findUniqueOrThrow({ where: { telegramId: BigInt(vali.id) } });
       expect(blocked.botBlockedAt).not.toBeNull();
 
-      // Writing to the bot again un-blocks them.
+      expect(await reminders.runOnce(after(t0, 60))).toBe(1);
+      expect(sentTo(ali.id)[1].payload.text).toBe('Oxirgi imkoniyat!');
+      expect(sentTo(vali.id)).toHaveLength(1); // the failed attempt only, nothing after
+
       tg.failFor.delete(vali.id);
       await tg.text(vali, '/start');
       expect((await app.prisma.user.findUniqueOrThrow({ where: { telegramId: BigInt(vali.id) } })).botBlockedAt).toBeNull();
@@ -267,12 +306,4 @@ describe('Reminders, announcements and named locations', () => {
     return app.get(ProductsService);
   }
 
-  async function placeOrder(user: ReturnType<typeof FakeTelegram.user>) {
-    await tg.text(user, t.menu.buy);
-    await tg.callback(user, tg.button('Savatga'));
-    await tg.callback(user, 'bt:0');
-    await tg.contact(user, '998901234567');
-    await tg.text(user, 'Chilonzor 1');
-    await tg.callback(user, 'co:ok');
-  }
 });

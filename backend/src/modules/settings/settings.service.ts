@@ -51,6 +51,15 @@ export class SettingsService {
       throw new DomainError('VALIDATION', 'max_item_quantity cannot be below min_order_quantity');
     }
 
+    // The second reminder must come after the first one (when both are enabled).
+    if (key === 'reminder_first_minutes' || key === 'reminder_second_minutes') {
+      const first = key === 'reminder_first_minutes' ? Number(value) : await this.getInt('reminder_first_minutes');
+      const second = key === 'reminder_second_minutes' ? Number(value) : await this.getInt('reminder_second_minutes');
+      if (first > 0 && second > 0 && second <= first) {
+        throw new DomainError('VALIDATION', 'reminder_second_minutes must be greater than reminder_first_minutes');
+      }
+    }
+
     await this.prisma.setting.upsert({ where: { key }, create: { key, value }, update: { value } });
     this.logger.log({ msg: 'Setting changed', key, changedBy });
     return value;

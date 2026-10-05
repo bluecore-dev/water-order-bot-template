@@ -60,6 +60,20 @@ export class UsersService {
     return this.prisma.user.update({ where: { id: user.id }, data: { lastActivityAt: now, botBlockedAt: null } });
   }
 
+  /** /start pressed: begin a new reminder cycle. */
+  startCycle(user: User, now = new Date()): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: user.id },
+      data: { startedAt: now, startReminders: 0, engagedAfterStart: false },
+    });
+  }
+
+  /** First message/button after /start: no more reminders for this cycle (one write per cycle). */
+  async markEngaged(user: User): Promise<User> {
+    if (!user.startedAt || user.engagedAfterStart) return user;
+    return this.prisma.user.update({ where: { id: user.id }, data: { engagedAfterStart: true } });
+  }
+
   /** Telegram answered 403: the user blocked the bot or deleted the account. */
   async markBlocked(telegramId: number | bigint | string): Promise<void> {
     await this.prisma.user.updateMany({ where: { telegramId: BigInt(telegramId), botBlockedAt: null }, data: { botBlockedAt: new Date() } });

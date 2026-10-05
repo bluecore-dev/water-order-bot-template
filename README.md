@@ -10,7 +10,8 @@ in-bot admin mode and amoCRM integration.
 - **Admins** manage products, prices, photos and contact settings **inside the same bot**
   (`⚙️ Boshqaruv`), and can **broadcast news/discounts** to all customers. There is no separate
   web panel. See [docs/architecture.md](docs/architecture.md#decisions).
-- People who open the bot but don't order get **one daytime reminder** with an order button.
+- After `/start`, a user who neither writes nor taps anything gets **a reminder at 10 min and one
+  at 60 min** (with an order button), then nothing more. Any interaction cancels the rest.
 - A shared **location is turned into a street/district name** (OpenStreetMap, or Yandex with a key).
 - The bot's **Telegram profile** (description, about text, command menu) is generated from the
   settings and kept in sync. Admins can change the bot **avatar** from the bot.
@@ -92,7 +93,7 @@ Open the bot in Telegram and send `/start`. If your Telegram id is in `ADMIN_TEL
 
 ## Tests
 
-`npm test` runs 107 tests: unit tests (pricing, phone, crypto, payloads, env) and integration
+`npm test` runs 109 tests: unit tests (pricing, phone, crypto, payloads, env) and integration
 tests against a real PostgreSQL test database. Those cover order creation and price snapshots,
 idempotency, the amoCRM worker against a fake amoCRM (success, failure, retry, no duplicates,
 token refresh), and **complete bot conversations** driven through grammY with a fake Telegram API.

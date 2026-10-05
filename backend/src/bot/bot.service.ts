@@ -25,7 +25,7 @@ import { OrderHandler } from './handlers/order.handler';
 import { ProductHandler } from './handlers/product.handler';
 import { ProfileHandler } from './handlers/profile.handler';
 import { StartHandler } from './handlers/start.handler';
-import { privateChatOnly, rateLimit, timing, userContext } from './middlewares';
+import { privateChatOnly, rateLimit, startEngagement, timing, userContext } from './middlewares';
 import { PrismaSessionStorage } from './session/prisma-session.storage';
 import { StateRouter } from './state-router';
 import { BotApiHolder } from './services/bot-api.holder';
@@ -121,6 +121,7 @@ export class BotService implements OnApplicationBootstrap, OnModuleDestroy {
       }),
     );
     bot.use(userContext(this.users, this.admins));
+    bot.use(startEngagement(this.users));
 
     const router = new StateRouter();
     for (const handler of this.handlers) handler.register(bot, router);

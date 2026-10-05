@@ -15,8 +15,10 @@ export type SettingKey =
   | 'min_order_quantity'
   | 'max_empty_bottles'
   | 'damaged_bottle_fine'
-  | 'reminder_after_hours'
+  | 'reminder_first_minutes'
+  | 'reminder_second_minutes'
   | 'reminder_text'
+  | 'reminder_text_2'
   | 'bot_about'
   | 'bot_description';
 
@@ -81,10 +83,14 @@ export const SETTING_DEFINITIONS: Record<SettingKey, SettingDefinition> = {
       return v !== null && v <= 100_000_000 ? String(v) : null;
     },
   },
-  /** Hours of inactivity after which a user without orders gets one reminder; 0 = off. */
-  reminder_after_hours: { key: 'reminder_after_hours', kind: 'int', defaultValue: '3', optional: false, normalize: int(0, 168) },
-  /** Custom reminder text; empty = the default text from the locale. */
+  /** Minutes after /start (with no reply) before the first reminder; 0 = no first reminder. */
+  reminder_first_minutes: { key: 'reminder_first_minutes', kind: 'int', defaultValue: '10', optional: false, normalize: int(0, 1440) },
+  /** Minutes after /start before the second (last) reminder; 0 = no second reminder. */
+  reminder_second_minutes: { key: 'reminder_second_minutes', kind: 'int', defaultValue: '60', optional: false, normalize: int(0, 10080) },
+  /** Custom text of the first reminder; empty = the default text from the locale. */
   reminder_text: { key: 'reminder_text', kind: 'text', defaultValue: '', optional: true, normalize: text(500) },
+  /** Custom text of the second reminder; empty = the default text from the locale. */
+  reminder_text_2: { key: 'reminder_text_2', kind: 'text', defaultValue: '', optional: true, normalize: text(500) },
   /** Custom Telegram "About" (short description); empty = generated from the company name. */
   bot_about: { key: 'bot_about', kind: 'text', defaultValue: '', optional: true, normalize: text(120) },
   /** Custom "What can this bot do?" text shown before Start; empty = generated from settings. */

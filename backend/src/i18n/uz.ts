@@ -70,6 +70,8 @@ export const uz = {
     orderButton: '🛒 Buyurtma berish',
     reminder: (company: string) =>
       `💧 <b>${e(company)}</b>\n\nToza ichimlik suvi kerakmi? Bir necha bosishda buyurtma bering — kuryer eshigingizgacha olib keladi 🚚\n\nBoshlash uchun pastdagi tugmani bosing 👇`,
+    reminder2: (company: string) =>
+      `⏰ Buyurtma berishni unutmang 🙂\n\n💧 <b>${e(company)}</b> — toza ichimlik suvi eshigingizgacha. Buyurtma atigi bir daqiqa oladi.\n\nPastdagi tugmani bosing 👇`,
     customReminder: (text: string) => e(text),
   },
 
@@ -382,8 +384,10 @@ export const uz = {
       min_order_quantity: 'Minimal buyurtma',
       max_empty_bottles: 'Eng ko‘p bo‘sh idish',
       damaged_bottle_fine: 'Shikastlangan idish jarimasi',
-      reminder_after_hours: 'Eslatma (soatdan keyin)',
-      reminder_text: 'Eslatma matni',
+      reminder_first_minutes: '1-eslatma (daqiqa)',
+      reminder_second_minutes: '2-eslatma (daqiqa)',
+      reminder_text: '1-eslatma matni',
+      reminder_text_2: '2-eslatma matni',
       bot_about: 'Bot haqida (About)',
       bot_description: 'Bot tavsifi (Start oldidan)',
     } satisfies Record<SettingKey, string>,
@@ -399,9 +403,12 @@ export const uz = {
       max_empty_bottles: '1 dan 10000 gacha butun son.',
       damaged_bottle_fine:
         'So‘mda, masalan: <code>40000</code>. Buyurtma summasiga qo‘shilmaydi — mijozga bo‘sh idish qadamida va xulosada ogohlantirish sifatida ko‘rsatiladi. <code>0</code> — ko‘rsatilmaydi.',
-      reminder_after_hours:
-        'Botga kirib buyurtma bermagan mijozga necha soatdan keyin bir marta eslatma yuborilsin (masalan: <code>3</code>). Eslatmalar faqat 09:00–21:00 oralig‘ida ketadi. <code>0</code> — o‘chirilgan.',
-      reminder_text: 'Eslatmaning o‘z matningiz. Bo‘sh bo‘lsa, standart matn yuboriladi. Ostiga «🛒 Buyurtma berish» tugmasi qo‘shiladi.',
+      reminder_first_minutes:
+        'Mijoz /start bosib, hech narsa yozmasa yoki tugma bosmasa, necha daqiqadan keyin 1-eslatma yuborilsin (masalan: <code>10</code>). <code>0</code> — 1-eslatma yo‘q.',
+      reminder_second_minutes:
+        '/start bosilgandan necha daqiqa keyin 2-eslatma (oxirgisi) yuborilsin (masalan: <code>60</code>). 1-eslatmadan katta bo‘lishi kerak. <code>0</code> — 2-eslatma yo‘q.',
+      reminder_text: '1-eslatmaning o‘z matningiz. Bo‘sh bo‘lsa, standart matn. Ostiga «🛒 Buyurtma berish» tugmasi qo‘shiladi.',
+      reminder_text_2: '2-eslatmaning o‘z matningiz. Bo‘sh bo‘lsa, standart matn. Ostiga «🛒 Buyurtma berish» tugmasi qo‘shiladi.',
       bot_about:
         'Bot profilidagi qisqa matn (120 belgigacha). Bo‘sh bo‘lsa, kompaniya nomidan avtomatik tuziladi.',
       bot_description:

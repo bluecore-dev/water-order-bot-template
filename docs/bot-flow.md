@@ -81,10 +81,12 @@ Price changes apply to the very next customer message. Past orders keep their pr
 
 ## Reminder and announcements
 
-- **Reminder.** A user with no orders who has been inactive for `reminder_after_hours`
-  (default 3, 0 = off) gets one message: the default text or `reminder_text`, plus a
-  `🛒 Buyurtma berish` button. It is sent only between 09:00 and 21:00 (business timezone),
-  never to admins, never twice, and not to people inactive for more than 7 days.
+- **Start reminders.** Every `/start` opens a cycle. If the user then neither writes nor taps
+  anything, they get reminder 1 after `reminder_first_minutes` (default 10) and reminder 2
+  after `reminder_second_minutes` (default 60, counted from `/start`), each with a
+  `🛒 Buyurtma berish` button, and nothing after that. Any message or button press cancels the
+  rest, and the next `/start` starts a new cycle. A reminder more than 30 minutes late (bot
+  offline) is dropped. Texts: defaults or `reminder_text` / `reminder_text_2`.
 - **Announcement (`📣 Xabar yuborish`).** The admin's message is copied to every user who hasn't
   blocked the bot (~25 per second, in the background, resumable after a restart), with the same
   order button. The author receives a report: delivered / blocked / failed. A 403 from Telegram

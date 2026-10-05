@@ -59,6 +59,18 @@ export function userContext(users: UsersService, admins: AdminsService): Middlew
   };
 }
 
+/**
+ * Reminder bookkeeping: /start opens a cycle (StartHandler), and any other message or button
+ * press afterwards means the user is engaged, which cancels the remaining reminders.
+ */
+export function startEngagement(users: UsersService): MiddlewareFn<BotContext> {
+  return async (ctx, next) => {
+    const isStart = /^\/start(@\w+)?(\s|$)/.test(ctx.message?.text ?? '');
+    if (!isStart) ctx.user = await users.markEngaged(ctx.user);
+    await next();
+  };
+}
+
 /** Logs slow updates; helps spot DB or Telegram latency without per-update noise. */
 export function timing(logger: Logger, slowMs = 3000): MiddlewareFn<BotContext> {
   return async (ctx, next) => {
